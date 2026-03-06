@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="Walmart.Application/Walmart.Application.csproj" />
+  <Project Path="Walmart.Domain/Walmart.Domain.csproj" />
+  <Project Path="Walmart.Infrastructure/Walmart.Infrastructure.csproj" />
+  <Project Path="Walmart/Walmart.csproj" />
+</Solution>
