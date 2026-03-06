@@ -1,0 +1,107 @@
+﻿@model OrderDetailsVM
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h2 class="mb-0">📦 Order #@Model.OrderNumber</h2>
+                        @switch (Model.Status)
+                        {
+                            case 0:
+                                <span class="badge bg-warning fs-6">Pending</span>
+                                break;
+                            case 1:
+                                <span class="badge bg-info fs-6">Processing</span>
+                                break;
+                            case 2:
+                                <span class="badge bg-primary fs-6">Shipped</span>
+                                break;
+                            case 3:
+                                <span class="badge bg-success fs-6">Delivered</span>
+                                break;
+                            case 4:
+                                <span class="badge bg-danger fs-6">Cancelled</span>
+                                break;
+                        }
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h5>Customer Information</h5>
+                            <p>
+                                <strong>Name:</strong> @Model.UserName<br />
+                                <strong>Email:</strong> @Model.UserEmail
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5>Order Information</h5>
+                            <p>
+                                <strong>Order Date:</strong> @Model.OrderDate.ToString("MMMM dd, yyyy")<br />
+                                <strong>Order ID:</strong> @Model.Id
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Shipping Address</h5>
+                        <p>@Model.ShippingAddress</p>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5>Order Items</h5>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th>
+                                        <th class="text-end">Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var product in Model.Products)
+                                    {
+                                        <tr>
+                                            <td>@product.ProductName</td>
+                                            <td class="text-end">$@product.Price.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-success">
+                                        <td class="text-end"><strong>Total Amount:</strong></td>
+                                        <td class="text-end"><strong>$@Model.TotalAmount.ToString("N2")</strong></td>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex gap-2">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                ✏️ Edit Order
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure?');">
+                                <button type="submit" class="btn btn-danger">
+                                    🗑️ Delete Order
+                                </button>
+                            </form>
+                        }
+                        <a asp-action="Index" class="btn btn-outline-secondary ms-auto">
+                            ← Back to Orders
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

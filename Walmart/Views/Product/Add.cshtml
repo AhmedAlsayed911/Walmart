@@ -1,0 +1,107 @@
+﻿@model AddProductVM
+
+@{
+    ViewData["Title"] = "Add Product";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-4">
+
+                    <h3 class="mb-4 text-center">
+                        ➕ Add New Product
+                    </h3>
+
+                    <form asp-action="Add"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        <div asp-validation-summary="All"
+                             class="text-danger mb-3">
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label"></label>
+                            <input asp-for="Name"
+                                   class="form-control" />
+                            <span asp-validation-for="Name"
+                                  class="text-danger"></span>
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label asp-for="Sku" class="form-label"></label>
+                            <input asp-for="Sku"
+                                   class="form-control" />
+                            <span asp-validation-for="Sku"
+                                  class="text-danger"></span>
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label asp-for="Price" class="form-label"></label>
+                            <input asp-for="Price"
+                                   class="form-control" />
+                            <span asp-validation-for="Price"
+                                  class="text-danger"></span>
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label asp-for="StockQuantity"
+                                   class="form-label"></label>
+                            <input asp-for="StockQuantity"
+                                   class="form-control" />
+                            <span asp-validation-for="StockQuantity"
+                                  class="text-danger"></span>
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label asp-for="CategoryId"
+                                   class="form-label"></label>
+                            <select asp-for="CategoryId"
+                                    asp-items="Model.Categories"
+                                    class="form-select">
+                                <option value="">-- Select Category --</option>
+                            </select>
+                            <span asp-validation-for="CategoryId"
+                                  class="text-danger"></span>
+                        </div>
+
+                        
+                        <div class="mb-3">
+                            <label asp-for="ProductPicture"
+                                   class="form-label"></label>
+                            <input asp-for="ProductPicture"
+                                   type="file"
+                                   class="form-control" />
+                            <span asp-validation-for="ProductPicture"
+                                  class="text-danger"></span>
+                        </div>
+
+                        
+                        <div class="d-flex justify-content-between">
+                            <a asp-action="Index"
+                               class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+
+                            <button type="submit"
+                                    class="btn btn-dark">
+                                💾 Save Product
+                            </button>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

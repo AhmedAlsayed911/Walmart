@@ -1,0 +1,141 @@
+﻿@model ProductDetailsVM
+
+@{
+    ViewData["Title"] = "Product Details";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg">
+                @if (Model.ProductPicture != null)
+                {
+                    <img src="data:image/png;base64,@Convert.ToBase64String(Model.ProductPicture)" 
+                         class="card-img-top" 
+                         alt="@Model.Name" 
+                         style="height: 400px; object-fit: cover;" />
+                }
+                else
+                {
+                    <img src="~/images/DefaultProduct.jpg" 
+                         class="card-img-top" 
+                         alt="@Model.Name" 
+                         style="height: 400px; object-fit: cover;" />
+                }
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-lg">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-3">@Model.Name</h2>
+                    
+                    <span class="badge bg-primary mb-3 fs-6">@Model.CategoryName</span>
+                    
+                    <h3 class="text-success mb-4">$@Model.Price.ToString("N2")</h3>
+                    
+                    <div class="mb-3">
+                        <strong>SKU:</strong> @Model.Sku
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Stock:</strong> 
+                        @if (Model.StockQuantity > 10)
+                        {
+                            <span class="badge bg-success">In Stock (@Model.StockQuantity available)</span>
+                        }
+                        else if (Model.StockQuantity > 0)
+                        {
+                            <span class="badge bg-warning text-dark">Low Stock (@Model.StockQuantity left)</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Out of Stock</span>
+                        }
+                    </div>
+                    
+                    <div class="mb-3">
+                        <strong>Created:</strong> @Model.CreatedAt.ToString("MMM dd, yyyy")
+                    </div>
+                    
+                    <hr />
+                    
+                    @if (User.Identity.IsAuthenticated && Model.IsActive)
+                    {
+                        <form id="addToCartForm" class="mb-3">
+                            <div class="input-group mb-3" style="max-width: 200px;">
+                                <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity()">-</button>
+                                <input type="number" id="quantity" class="form-control text-center" value="1" min="1" max="@Model.StockQuantity" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity()">+</button>
+                            </div>
+                            
+                            <button type="button" onclick="addToCart(@Model.Id)" class="btn btn-success btn-lg w-100 mb-2">
+                                🛒 Add to Cart
+                            </button>
+                        </form>
+                    }
+                    
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <div class="d-flex gap-2 mt-4">
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning flex-fill">
+                                ✏️ Edit
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="flex-fill" onsubmit="return confirm('Are you sure you want to delete this product?');">
+                                <button type="submit" class="btn btn-danger w-100">
+                                    🗑️ Delete
+                                </button>
+                            </form>
+                        </div>
+                    }
+                    
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">
+                        ← Back to Products
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function increaseQuantity() {
+            let input = document.getElementById('quantity');
+            let max = parseInt(input.getAttribute('max'));
+            let current = parseInt(input.value);
+            if (current < max) {
+                input.value = current + 1;
+            }
+        }
+
+        function decreaseQuantity() {
+            let input = document.getElementById('quantity');
+            let current = parseInt(input.value);
+            if (current > 1) {
+                input.value = current - 1;
+            }
+        }
+
+        function addToCart(productId) {
+            let quantity = parseInt(document.getElementById('quantity').value);
+            
+            $.ajax({
+                url: '@Url.Action("AddToCart", "Cart")',
+                type: 'POST',
+                data: { productId: productId, quantity: quantity },
+                success: function(result) {
+                    if (result.success) {
+                        alert('Product added to cart!');
+                        $('#cart-count').text(result.cartCount);
+                    } else {
+                        alert(result.message);
+                    }
+                },
+                error: function() {
+                    alert('Error adding product to cart');
+                }
+            });
+        }
+    </script>
+}

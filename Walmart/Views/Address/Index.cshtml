@@ -1,0 +1,83 @@
+﻿@model PaginatedResult<AddressListVM>
+
+@{
+    ViewData["Title"] = "Addresses Management";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">📍 Addresses Management</h2>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="d-flex justify-content-end mb-3">
+            <a asp-action="Add" class="btn btn-success">
+                ➕ Add New Address
+            </a>
+        </div>
+    }
+
+    <div class="row g-4">
+        @if (Model.Items.Any())
+        {
+            foreach (var address in Model.Items)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm border-0">
+                        <div class="card-body">
+                            @if (address.IsDefault)
+                            {
+                                <span class="badge bg-success mb-2">Default</span>
+                            }
+                            <h6 class="card-title">@address.UserName</h6>
+                            <p class="card-text text-muted small">@address.UserEmail</p>
+                            <hr />
+                            <p class="mb-1"><strong>@address.Street</strong></p>
+                            <p class="mb-0">@address.City, @address.Country</p>
+                            <p class="text-muted">@address.ZIP</p>
+
+                            <div class="d-flex gap-2 mt-3">
+                                <a asp-action="Details" asp-route-id="@address.Id" class="btn btn-sm btn-info flex-fill">
+                                    👁️ View
+                                </a>
+                                @if (User.IsInRole("Admin"))
+                                {
+                                    <a asp-action="Edit" asp-route-id="@address.Id" class="btn btn-sm btn-warning">
+                                        ✏️
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@address.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            🗑️
+                                        </button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    No addresses found.
+                </div>
+            </div>
+        }
+    </div>
+
+    
+    @if (Model.TotalPages > 1)
+    {
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                @for (int i = 1; i <= Model.TotalPages; i++)
+                {
+                    <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
+</div>

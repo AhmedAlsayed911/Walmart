@@ -1,0 +1,54 @@
+﻿@model AddressDetailsVM
+
+@{
+    ViewData["Title"] = "Address Details";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <h2 class="card-title mb-4">
+                        📍 Address Details
+                        @if (Model.IsDefault)
+                        {
+                            <span class="badge bg-success">Default</span>
+                        }
+                    </h2>
+
+                    <div class="mb-3">
+                        <strong>User:</strong>
+                        <p>@Model.UserName (@Model.UserEmail)</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <strong>Full Address:</strong>
+                        <p class="mb-0">@Model.Street</p>
+                        <p class="mb-0">@Model.City, @Model.Country</p>
+                        <p>@Model.ZIP</p>
+                    </div>
+
+                    <hr />
+
+                    <div class="d-flex gap-2">
+                        @if (User.IsInRole("Admin"))
+                        {
+                            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
+                                ✏️ Edit Address
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure?');">
+                                <button type="submit" class="btn btn-danger">
+                                    🗑️ Delete Address
+                                </button>
+                            </form>
+                        }
+                        <a asp-action="Index" class="btn btn-outline-secondary ms-auto">
+                            ← Back to Addresses
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

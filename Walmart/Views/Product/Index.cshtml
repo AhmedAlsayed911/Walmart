@@ -1,0 +1,132 @@
+﻿@model PaginatedResult<ProductsListVM>
+
+@{
+    ViewData["Title"] = "Product List";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">🛍 Products</h2>
+
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="d-flex justify-content-end mb-3">
+            <a asp-action="Add" class="btn btn-success">
+                ➕ Add Product
+            </a>
+        </div>
+    }
+    <div class="row g-4 mt-4">
+
+        @if (Model.Items.Any())
+        {
+            foreach (var item in Model.Items)
+            {
+                <div class="col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm border-0 product-card">
+
+                        @if (item.ProductPicture != null)
+                        {
+                            <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductPicture)" />
+                        }
+                        else
+                        {
+                            <img src="~/images/DefaultProduct.jpg" />
+                        }
+
+                        <div class="card-body d-flex flex-column">
+
+                            
+                            <h6 class="card-title fw-bold text-truncate">
+                                @item.Name
+                            </h6>
+
+                            
+                            <span class="badge bg-light text-dark mb-2">
+                                @item.CategoryName
+                            </span>
+
+                            
+                            <div class="mb-2">
+                                <span class="text-success fw-bold fs-5">
+                                    $@item.Price.ToString("N2")
+                                </span>
+                            </div>
+
+                            
+                            <div class="mb-3">
+                                @if (item.StockQuantity > 10)
+                                {
+                                    <span class="text-success small">
+                                        In Stock
+                                    </span>
+                                }
+                                else if (item.StockQuantity > 0)
+                                {
+                                    <span class="text-warning small">
+                                        Low Stock
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-danger small">
+                                        Out of Stock
+                                    </span>
+                                }
+                            </div>
+
+                            
+                            <a asp-action="Details"
+                               asp-route-id="@item.Id"
+                               class="btn btn-dark mt-auto">
+                                View Details
+                            </a>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="mt-2 d-flex gap-2">
+                                    <a asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                       class="btn btn-sm btn-warning w-50">
+                                        ✏ Edit
+                                    </a>
+
+                                    <form asp-action="Delete"
+                                          asp-route-id="@item.Id"
+                                          method="post"
+                                          class="w-50"
+                                          onsubmit="return confirm('Are you sure?');">
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">
+                                            🗑 Delete
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="col-12 text-center">
+                <p>No products available.</p>
+            </div>
+        }
+
+    </div>
+
+    
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            @for (int i = 1; i <= Model.TotalPages; i++)
+            {
+                <li class="page-item @(i == Model.PageNumber ? "active" : "")">
+                    <a class="page-link"
+                       asp-action="Index"
+                       asp-route-page="@i">
+                        @i
+                    </a>
+                </li>
+            }
+        </ul>
+    </nav>
+</div>
