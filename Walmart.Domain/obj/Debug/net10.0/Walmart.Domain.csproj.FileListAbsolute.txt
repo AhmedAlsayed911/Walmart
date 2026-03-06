@@ -1,0 +1,12 @@
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\bin\Debug\net10.0\Walmart.Domain.deps.json
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\bin\Debug\net10.0\Walmart.Domain.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\bin\Debug\net10.0\Walmart.Domain.pdb
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.csproj.AssemblyReference.cache
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.AssemblyInfoInputs.cache
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.AssemblyInfo.cs
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.csproj.CoreCompileInputs.cache
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\refint\Walmart.Domain.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.pdb
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\ref\Walmart.Domain.dll
