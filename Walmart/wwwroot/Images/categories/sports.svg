@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360">
+  <rect width="600" height="360" fill="#0f4c81"/>
+  <circle cx="300" cy="175" r="95" fill="#f7f7f7"/>
+  <path d="M225 108 A95 95 0 0 1 375 242" stroke="#0f4c81" stroke-width="14" fill="none"/>
+  <path d="M375 108 A95 95 0 0 0 225 242" stroke="#0f4c81" stroke-width="14" fill="none"/>
+  <text x="38" y="330" fill="#e8f4ff" font-family="Segoe UI, sans-serif" font-size="34" font-weight="700">Sports &amp; Outdoors</text>
+</svg>

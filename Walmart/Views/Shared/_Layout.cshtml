@@ -52,7 +52,7 @@
                             </li>
                         }
                     </ul>
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav align-items-center gap-1">
                         @if (User.IsInRole("Client"))
                         {
                             <li class="nav-item">
@@ -95,6 +95,25 @@
             </div>
         </div>
     </footer>
+
+    <!-- Global Action Confirmation Modal -->
+    <div class="modal fade" id="globalConfirmModal" tabindex="-1" aria-hidden="true" style="z-index: 9999;">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header border-0 bg-light py-3">
+                    <h5 class="modal-title fs-5" id="globalConfirmTitle">Confirm Action</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4 fs-6" id="globalConfirmBody">
+                    Are you sure you want to proceed?
+                </div>
+                <div class="modal-footer border-0 bg-light py-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-4" data-bs-dismiss="modal" id="globalConfirmCancelBtn">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-sm px-4" id="globalConfirmBtn">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

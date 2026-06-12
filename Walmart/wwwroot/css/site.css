@@ -363,6 +363,21 @@ a:hover {
   margin-top: 0.25rem;
 }
 
+.validation-summary-errors {
+  background-color: var(--color-danger-light);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+.validation-summary-errors ul {
+  margin-bottom: 0;
+  padding-left: 1.25rem;
+}
+
 /* ==========================================
    5. Modern Table Design
    ========================================== */

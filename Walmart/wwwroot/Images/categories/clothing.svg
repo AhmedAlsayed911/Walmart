@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360">
+  <rect width="600" height="360" fill="#8b2635"/>
+  <path d="M180 95 L250 65 L350 65 L420 95 L390 165 L350 145 L350 280 L250 280 L250 145 L210 165 Z" fill="#f1d1d6"/>
+  <text x="50" y="325" fill="#fff5f6" font-family="Segoe UI, sans-serif" font-size="40" font-weight="700">Clothing</text>
+</svg>

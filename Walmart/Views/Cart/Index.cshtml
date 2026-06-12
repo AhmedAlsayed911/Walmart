@@ -1,4 +1,4 @@
-﻿@model CartVM
+@model CartVM
 
 @{
     ViewData["Title"] = "Shopping Cart";
@@ -126,7 +126,7 @@
         }
 
         function removeFromCart(productId) {
-            if (confirm('Remove this item from cart?')) {
+            window.showConfirmModal("Remove Item", "Remove this item from cart?", function() {
                 $.ajax({
                     url: '@Url.Action("RemoveFromCart", "Cart")',
                     type: 'POST',
@@ -140,11 +140,11 @@
                         alert('Error removing item');
                     }
                 });
-            }
+            });
         }
 
         function clearCart() {
-            if (confirm('Clear all items from cart?')) {
+            window.showConfirmModal("Clear Cart", "Clear all items from cart?", function() {
                 $.ajax({
                     url: '@Url.Action("ClearCart", "Cart")',
                     type: 'POST',
@@ -157,7 +157,7 @@
                         alert('Error clearing cart');
                     }
                 });
-            }
+            });
         }
 
         

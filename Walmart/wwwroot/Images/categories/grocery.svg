@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 360">
+  <rect width="600" height="360" fill="#2a9d8f"/>
+  <rect x="130" y="120" width="340" height="170" rx="16" fill="#e9fff9"/>
+  <circle cx="190" cy="185" r="25" fill="#ef476f"/>
+  <circle cx="250" cy="185" r="25" fill="#ffd166"/>
+  <circle cx="310" cy="185" r="25" fill="#06d6a0"/>
+  <circle cx="370" cy="185" r="25" fill="#118ab2"/>
+  <text x="160" y="320" fill="#f0fffb" font-family="Segoe UI, sans-serif" font-size="40" font-weight="700">Food &amp; Grocery</text>
+</svg>
