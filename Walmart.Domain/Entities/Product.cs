@@ -9,6 +9,8 @@ namespace Walmart.Domain.Entities
         public string Sku { get; set; }
         public byte[]? ProductPicture { get; set; }
         public decimal Price { get; set; }
+        public decimal? SalePercentage { get; set; }
+        public DateTime? SaleEndDate { get; set; }
         public int StockQuantity { get; set; }
         public bool IsActive => StockQuantity > 0;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

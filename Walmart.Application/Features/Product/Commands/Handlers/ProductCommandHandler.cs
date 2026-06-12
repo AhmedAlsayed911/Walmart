@@ -6,10 +6,14 @@ using Walmart.Application.Features.Product.Commands.Models;
 
 namespace Walmart.Application.Features.Product.Commands.Handlers
 {
-    public class ProductCommandHandler(IBaseRepository<Walmart.Domain.Entities.Product> repository, IMapper mapper)
+        public class ProductCommandHandler(
+                IBaseRepository<Walmart.Domain.Entities.Product> repository,
+                IBaseRepository<Walmart.Domain.Entities.OrderProduct> orderProductRepository,
+                IMapper mapper)
         : IRequestHandler<AddProductCommand, bool>,
           IRequestHandler<UpdateProductCommand, bool>,
-          IRequestHandler<DeleteProductCommand, bool>
+            IRequestHandler<DeleteProductCommand, bool>,
+            IRequestHandler<SetProductSaleCommand, bool>
     {
         public async Task<bool> Handle(AddProductCommand request, CancellationToken cancellationToken)
         {
@@ -74,7 +78,67 @@ namespace Walmart.Application.Features.Product.Commands.Handlers
             if (product is null)
                 return false;
 
+            var orderLines = await orderProductRepository
+                .GetTableAsTracking()
+                .Where(op => op.ProductId == request.Id)
+                .ToListAsync(cancellationToken);
+
+            if (orderLines.Any())
+            {
+                // Keep historical order lines by moving them to an archived placeholder product.
+                var archivedSku = $"DELETED-{product.Id}-{Guid.NewGuid():N}";
+                if (archivedSku.Length > 450)
+                    archivedSku = archivedSku[..450];
+
+                var archivedProduct = new Walmart.Domain.Entities.Product
+                {
+                    Name = product.Name,
+                    Sku = archivedSku,
+                    ProductPicture = product.ProductPicture,
+                    Price = product.Price,
+                    StockQuantity = 0,
+                    CategoryId = product.CategoryId,
+                    CreatedAt = product.CreatedAt,
+                    SalePercentage = null,
+                    SaleEndDate = null
+                };
+
+                await repository.AddAsync(archivedProduct);
+
+                foreach (var line in orderLines)
+                {
+                    line.ProductId = archivedProduct.Id;
+                }
+
+                await orderProductRepository.UpdateRangeAsync(orderLines);
+            }
+
             await repository.DeleteAsync(product);
+            return true;
+        }
+
+        public async Task<bool> Handle(SetProductSaleCommand request, CancellationToken cancellationToken)
+        {
+            var product = await repository.GetByIdAsync(request.ProductId);
+            if (product is null)
+                return false;
+
+            if (!request.SalePercentage.HasValue || request.SalePercentage <= 0)
+            {
+                product.SalePercentage = null;
+                product.SaleEndDate = null;
+                await repository.UpdateAsync(product);
+                return true;
+            }
+
+            var saleEndDate = request.SaleEndDate ?? DateTime.UtcNow.AddDays(7);
+            if (saleEndDate <= DateTime.UtcNow)
+                return false;
+
+            product.SalePercentage = request.SalePercentage;
+            product.SaleEndDate = saleEndDate;
+
+            await repository.UpdateAsync(product);
             return true;
         }
     }

@@ -13,29 +13,29 @@
     <li class="nav-item d-flex align-items-center me-1">
         @if (appUser?.ProfilePicture is not null)
         {
-            <img class="rounded-circle avatar" alt="profile" src="data:image/png;base64,@(Convert.ToBase64String(appUser.ProfilePicture))" style="width: 36px; height: 36px; object-fit: cover; border: 2px solid var(--primary-blue-light);" />
+            <img class="rounded-circle avatar" alt="profile" src="data:image/png;base64,@(Convert.ToBase64String(appUser.ProfilePicture))" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid var(--primary-blue-light);" />
         }
         else
         {
-            <img class="rounded-circle avatar" alt="profile" src="~/Images/profilepic.jpg" style="width: 36px; height: 36px; object-fit: cover; border: 2px solid var(--primary-blue-light);" />
+            <img class="rounded-circle avatar" alt="profile" src="~/Images/profilepic.jpg" style="width: 32px; height: 32px; object-fit: cover; border: 2px solid var(--primary-blue-light);" />
         }
     </li>
     <li class="nav-item">
-        <a class="nav-link-custom fw-semibold" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @(appUser != null ? appUser.FirstName + " " + appUser.LastName : User.Identity?.Name)!</a>
+        <a class="nav-link-custom fw-semibold" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @(appUser != null ? appUser.FirstName : User.Identity?.Name)!</a>
     </li>
     <li class="nav-item">
         <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button type="submit" class="btn-blue-link bg-transparent border-0 p-0 fs-6">Logout</button>
+            <button type="submit" class="nav-link-custom bg-transparent border-0" style="cursor: pointer;">Logout</button>
         </form>
     </li>
 }
 else
 {
     <li class="nav-item">
-        <a class="btn-blue-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        <a class="nav-link-custom" asp-area="Identity" asp-page="/Account/Login">Login</a>
     </li>
     <li class="nav-item">
-        <a class="btn-orange-pill ms-2" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        <a class="btn btn-primary btn-sm ms-2" asp-area="Identity" asp-page="/Account/Register">Register</a>
     </li>
 }
 </ul>

@@ -28,6 +28,7 @@ namespace Walmart.Controllers
 
             var user = await userManager.GetUserAsync(User);
             var addresses = await mediator.Send(new GetAllAddressesQuery { PageNumber = 1, PageSize = 100 });
+            addresses.Items = addresses.Items.Where(a => a.UserId == user.Id).ToList();
 
             return View("Index", addresses);
         }
@@ -37,6 +38,10 @@ namespace Walmart.Controllers
             var address = await mediator.Send(new GetAddressByIdQuery { Id = id });
             if (address is null)
                 return NotFound();
+
+            var currentUser = await userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && currentUser?.Id != address.UserId)
+                return Forbid();
 
             return View(address);
         }
@@ -112,6 +117,10 @@ namespace Walmart.Controllers
             if (address is null)
                 return NotFound();
 
+            var currentUser = await userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && currentUser?.Id != address.UserId)
+                return Forbid();
+
             var users = userManager.Users.ToList();
             var model = new EditAddressVM
             {
@@ -129,20 +138,39 @@ namespace Walmart.Controllers
                 })
             };
 
+            if (!User.IsInRole("Admin"))
+                model.Users = users.Where(u => u.Id == address.UserId).Select(u => new SelectListItem { Value = u.Id, Text = u.Email });
+
+            ViewBag.IsAdminEdit = User.IsInRole("Admin");
+
             return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(EditAddressVM model)
         {
+            var existing = await mediator.Send(new GetAddressByIdQuery { Id = model.Id });
+            if (existing is null)
+                return NotFound();
+
+            var currentUser = await userManager.GetUserAsync(User);
+            if (!User.IsInRole("Admin") && currentUser?.Id != existing.UserId)
+                return Forbid();
+
+            var isAdmin = User.IsInRole("Admin");
+            if (!isAdmin)
+                model.UserId = existing.UserId;
+
             if (!ModelState.IsValid)
             {
                 var users = userManager.Users.ToList();
-                model.Users = users.Select(u => new SelectListItem
+                model.Users = (isAdmin ? users : users.Where(u => u.Id == existing.UserId)).Select(u => new SelectListItem
                 {
                     Value = u.Id,
                     Text = u.Email
                 });
+
+                ViewBag.IsAdminEdit = isAdmin;
                 return View(model);
             }
 
@@ -160,17 +188,14 @@ namespace Walmart.Controllers
             if (!result)
                 return NotFound();
 
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(isAdmin ? nameof(Index) : nameof(MyAddresses));
         }
 
         [HttpPost]
-        public async Task<IActionResult> Delete(int id)
+        public IActionResult Delete(int id)
         {
-            var result = await mediator.Send(new DeleteAddressCommand { Id = id });
-            if (!result)
-                return NotFound();
-
-            return RedirectToAction(nameof(Index));
+            TempData["ErrorMessage"] = "Address deletion is disabled. Addresses can be edited but not deleted.";
+            return RedirectToAction(User.IsInRole("Admin") ? nameof(Index) : nameof(MyAddresses));
         }
     }
 }

@@ -9,14 +9,16 @@ using Walmart.Domain.Entities;
 
 namespace Walmart.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Client")]
     public class CartController(
         IBaseRepository<Product> productRepository,
         IBaseRepository<Address> addressRepository,
         IBaseRepository<Order> orderRepository,
+        IBaseRepository<OrderProduct> orderProductRepository,
         UserManager<ApplicationUser> userManager) : Controller
     {
         private const string CartSessionKey = "ShoppingCart";
+        private const decimal TaxRate = 0.1m;
 
         public IActionResult Index()
         {
@@ -36,7 +38,11 @@ namespace Walmart.Controllers
 
             if (existingItem != null)
             {
+                if (existingItem.Quantity + quantity > product.StockQuantity)
+                    return Json(new { success = false, message = $"Only {product.StockQuantity} unit(s) available" });
+
                 existingItem.Quantity += quantity;
+                existingItem.Price = product.Price;
             }
             else
             {
@@ -55,7 +61,7 @@ namespace Walmart.Controllers
         }
 
         [HttpPost]
-        public IActionResult UpdateQuantity(int productId, int quantity)
+        public async Task<IActionResult> UpdateQuantity(int productId, int quantity)
         {
             var cart = GetCart();
             var item = cart.Items.FirstOrDefault(x => x.ProductId == productId);
@@ -63,7 +69,30 @@ namespace Walmart.Controllers
             if (item != null)
             {
                 if (quantity > 0)
-                    item.Quantity = quantity;
+                {
+                    var product = await productRepository.GetByIdAsync(productId);
+                    if (product is null)
+                    {
+                        cart.Items.Remove(item);
+                    }
+                    else
+                    {
+                        if (product.StockQuantity < quantity)
+                        {
+                            return Json(new
+                            {
+                                success = false,
+                                message = $"Only {product.StockQuantity} unit(s) available.",
+                                cartCount = cart.Items.Sum(x => x.Quantity),
+                                subTotal = cart.SubTotal,
+                                grandTotal = cart.GrandTotal
+                            });
+                        }
+
+                        item.Quantity = quantity;
+                        item.Price = product.Price;
+                    }
+                }
                 else
                     cart.Items.Remove(item);
 
@@ -133,6 +162,10 @@ namespace Walmart.Controllers
                 return RedirectToAction(nameof(Checkout));
             }
 
+            var productsToUpdate = new List<Product>();
+            var orderLines = new List<OrderProduct>();
+            decimal subtotal = 0m;
+
             foreach (var cartItem in cart.Items)
             {
                 var product = await productRepository.GetByIdAsync(cartItem.ProductId);
@@ -141,31 +174,58 @@ namespace Walmart.Controllers
                     TempData["ErrorMessage"] = $"Sorry, {cartItem.ProductName} is no longer available in the requested quantity.";
                     return RedirectToAction(nameof(Checkout));
                 }
-            }
 
-            var order = new Order
-            {
-                UserId = user.Id,
-                ShippingAddressId = addressId,
-                OrderNumber = $"WM-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}",
-                Status = 0,
-                OrderDate = DateTime.UtcNow,
-                TotalAmount = cart.GrandTotal
-            };
+                var lineTotal = product.Price * cartItem.Quantity;
+                subtotal += lineTotal;
 
-            await orderRepository.AddAsync(order);
+                orderLines.Add(new OrderProduct
+                {
+                    ProductId = product.Id,
+                    Quantity = cartItem.Quantity,
+                    UnitPrice = product.Price,
+                    LineTotal = lineTotal
+                });
 
-            foreach (var cartItem in cart.Items)
-            {
-                var product = await productRepository.GetByIdAsync(cartItem.ProductId);
                 product.StockQuantity -= cartItem.Quantity;
-                await productRepository.UpdateAsync(product);
-
+                productsToUpdate.Add(product);
             }
 
-            TempData["SuccessMessage"] = $"Order placed successfully! Order Number: {order.OrderNumber}";
+            var totalAmount = subtotal + (subtotal * TaxRate);
 
-            HttpContext.Session.Remove(CartSessionKey);
+            using var transaction = orderRepository.BeginTransaction();
+            try
+            {
+                var order = new Order
+                {
+                    UserId = user.Id,
+                    ShippingAddressId = addressId,
+                    OrderNumber = $"WM-{DateTime.UtcNow:yyyyMMdd}-{Guid.NewGuid().ToString().Substring(0, 8).ToUpper()}",
+                    Status = 0,
+                    OrderDate = DateTime.UtcNow,
+                    TotalAmount = totalAmount
+                };
+
+                await orderRepository.AddAsync(order);
+
+                foreach (var line in orderLines)
+                {
+                    line.OrderId = order.Id;
+                }
+
+                await orderProductRepository.AddRangeAsync(orderLines);
+                await productRepository.UpdateRangeAsync(productsToUpdate);
+
+                orderRepository.Commit();
+
+                TempData["SuccessMessage"] = $"Order placed successfully! Order Number: {order.OrderNumber}";
+                HttpContext.Session.Remove(CartSessionKey);
+            }
+            catch
+            {
+                orderRepository.RollBack();
+                TempData["ErrorMessage"] = "Could not place order right now. Please try again.";
+                return RedirectToAction(nameof(Checkout));
+            }
 
             return RedirectToAction("MyOrders", "Order");
         }

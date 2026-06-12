@@ -123,3 +123,50 @@ document.addEventListener('submit', (event) => {
 		return false;
 	}
 });
+
+// Global Toast Notification manager
+window.showToast = function(message, type = 'success') {
+	const container = document.getElementById('toast-container');
+	if (!container) return;
+
+	const toastEl = document.createElement('div');
+	toastEl.className = `toast align-items-center border-0 shadow-lg mb-2`;
+	toastEl.role = 'alert';
+	toastEl.ariaLive = 'assertive';
+	toastEl.ariaAtomic = 'true';
+
+	// Define style variables based on type
+	let bgClass = 'bg-success text-white';
+	let icon = '✅';
+	if (type === 'danger' || type === 'error') {
+		bgClass = 'bg-danger text-white';
+		icon = '❌';
+	} else if (type === 'warning') {
+		bgClass = 'bg-warning text-dark';
+		icon = '⚠️';
+	} else if (type === 'info') {
+		bgClass = 'bg-info text-white';
+		icon = 'ℹ️';
+	}
+
+	toastEl.className += ` ${bgClass}`;
+
+	toastEl.innerHTML = `
+		<div class="d-flex">
+			<div class="toast-body d-flex align-items-center gap-2 py-3 px-4" style="font-size: 0.95rem; font-weight: 600;">
+				<span>${icon}</span>
+				<div>${message}</div>
+			</div>
+			<button type="button" class="btn-close btn-close-white me-3 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+	`;
+
+	container.appendChild(toastEl);
+	const toast = new bootstrap.Toast(toastEl, { delay: 4000 });
+	toast.show();
+
+	// Remove toast from DOM after hidden to save memory
+	toastEl.addEventListener('hidden.bs.toast', () => {
+		toastEl.remove();
+	});
+};

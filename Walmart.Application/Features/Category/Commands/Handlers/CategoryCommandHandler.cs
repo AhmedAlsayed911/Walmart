@@ -51,6 +51,13 @@ namespace Walmart.Application.Features.Category.Commands.Handlers
             if (category is null)
                 return false;
 
+            var hasProducts = await repository
+                .GetTableNoTracking()
+                .AnyAsync(c => c.Id == request.Id && c.Products.Any(), cancellationToken);
+
+            if (hasProducts)
+                return false;
+
             await repository.DeleteAsync(category);
             return true;
         }

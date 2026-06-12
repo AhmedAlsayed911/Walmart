@@ -6,6 +6,9 @@ namespace Walmart.Infrastructure.Data
 {
     public class DatabaseSeeder
     {
+        private static readonly byte[] PlaceholderImage = Convert.FromBase64String(
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+X2ioAAAAASUVORK5CYII=");
+
         private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -19,25 +22,27 @@ namespace Walmart.Infrastructure.Data
 
         public async Task SeedAsync()
         {
-            
-            if (await _context.Set<Product>().AnyAsync())
-            {
-                return; 
-            }
-
             await SeedRolesAsync();
             await SeedUsersAsync();
-            await SeedCategoriesAsync();
-            await SeedProductsAsync();
-            await SeedAddressesAsync();
-            await SeedOrdersAsync();
+
+            var hasProducts = await _context.Set<Product>().AnyAsync();
+            if (!hasProducts)
+            {
+                await SeedCategoriesAsync();
+                await SeedProductsAsync();
+                await SeedAddressesAsync();
+                await SeedOrdersAsync();
+            }
+
+            await EnsureProfilePicturesAsync();
+            await EnsureProductPicturesAsync();
 
             await _context.SaveChangesAsync();
         }
 
         private async Task SeedRolesAsync()
         {
-            string[] roles = { "Admin", "Customer" };
+            string[] roles = { "Admin", "Client", "StoreManager", "SupportAgent" };
 
             foreach (var roleName in roles)
             {
@@ -77,7 +82,9 @@ namespace Walmart.Infrastructure.Data
                 new { Email = "jane.smith@email.com", FirstName = "Jane", LastName = "Smith" },
                 new { Email = "bob.wilson@email.com", FirstName = "Bob", LastName = "Wilson" },
                 new { Email = "alice.brown@email.com", FirstName = "Alice", LastName = "Brown" },
-                new { Email = "charlie.davis@email.com", FirstName = "Charlie", LastName = "Davis" }
+                new { Email = "charlie.davis@email.com", FirstName = "Charlie", LastName = "Davis" },
+                new { Email = "linda.evans@email.com", FirstName = "Linda", LastName = "Evans" },
+                new { Email = "michael.clark@email.com", FirstName = "Michael", LastName = "Clark" }
             };
 
             foreach (var customer in customers)
@@ -90,16 +97,20 @@ namespace Walmart.Infrastructure.Data
                         Email = customer.Email,
                         EmailConfirmed = true,
                         FirstName = customer.FirstName,
-                        LastName = customer.LastName
+                        LastName = customer.LastName,
+                        PhoneNumber = "+1-555-01" + Random.Shared.Next(10, 99)
                     };
 
                     var result = await _userManager.CreateAsync(user, "Customer@123");
                     if (result.Succeeded)
                     {
-                        await _userManager.AddToRoleAsync(user, "Customer");
+                        await _userManager.AddToRoleAsync(user, "Client");
                     }
                 }
             }
+
+            await EnsureRoleUserAsync("StoreManager", "manager@walmart.com", "Store", "Manager", "Manager@123");
+            await EnsureRoleUserAsync("SupportAgent", "support@walmart.com", "Support", "Agent", "Support@123");
         }
 
         private async Task SeedCategoriesAsync()
@@ -146,7 +157,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 1199.99m,
                     StockQuantity = 50,
                     CategoryId = 1,
-                    CreatedAt = DateTime.UtcNow.AddDays(-30)
+                    CreatedAt = DateTime.UtcNow.AddDays(-30),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -155,7 +167,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 1099.99m,
                     StockQuantity = 35,
                     CategoryId = 1,
-                    CreatedAt = DateTime.UtcNow.AddDays(-28)
+                    CreatedAt = DateTime.UtcNow.AddDays(-28),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -164,7 +177,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 2499.99m,
                     StockQuantity = 20,
                     CategoryId = 1,
-                    CreatedAt = DateTime.UtcNow.AddDays(-25)
+                    CreatedAt = DateTime.UtcNow.AddDays(-25),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -173,7 +187,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 1799.99m,
                     StockQuantity = 15,
                     CategoryId = 1,
-                    CreatedAt = DateTime.UtcNow.AddDays(-22)
+                    CreatedAt = DateTime.UtcNow.AddDays(-22),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -182,7 +197,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 899.99m,
                     StockQuantity = 8,
                     CategoryId = 1,
-                    CreatedAt = DateTime.UtcNow.AddDays(-20)
+                    CreatedAt = DateTime.UtcNow.AddDays(-20),
+                    ProductPicture = PlaceholderImage
                 },
 
                 
@@ -193,7 +209,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 59.99m,
                     StockQuantity = 100,
                     CategoryId = 2,
-                    CreatedAt = DateTime.UtcNow.AddDays(-18)
+                    CreatedAt = DateTime.UtcNow.AddDays(-18),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -202,7 +219,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 129.99m,
                     StockQuantity = 75,
                     CategoryId = 2,
-                    CreatedAt = DateTime.UtcNow.AddDays(-15)
+                    CreatedAt = DateTime.UtcNow.AddDays(-15),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -211,7 +229,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 49.99m,
                     StockQuantity = 60,
                     CategoryId = 2,
-                    CreatedAt = DateTime.UtcNow.AddDays(-12)
+                    CreatedAt = DateTime.UtcNow.AddDays(-12),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -220,7 +239,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 29.99m,
                     StockQuantity = 120,
                     CategoryId = 2,
-                    CreatedAt = DateTime.UtcNow.AddDays(-10)
+                    CreatedAt = DateTime.UtcNow.AddDays(-10),
+                    ProductPicture = PlaceholderImage
                 },
 
                 
@@ -231,7 +251,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 299.99m,
                     StockQuantity = 25,
                     CategoryId = 3,
-                    CreatedAt = DateTime.UtcNow.AddDays(-8)
+                    CreatedAt = DateTime.UtcNow.AddDays(-8),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -240,7 +261,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 79.99m,
                     StockQuantity = 40,
                     CategoryId = 3,
-                    CreatedAt = DateTime.UtcNow.AddDays(-7)
+                    CreatedAt = DateTime.UtcNow.AddDays(-7),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -249,7 +271,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 39.99m,
                     StockQuantity = 85,
                     CategoryId = 3,
-                    CreatedAt = DateTime.UtcNow.AddDays(-5)
+                    CreatedAt = DateTime.UtcNow.AddDays(-5),
+                    ProductPicture = PlaceholderImage
                 },
 
                 
@@ -260,7 +283,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 34.99m,
                     StockQuantity = 90,
                     CategoryId = 4,
-                    CreatedAt = DateTime.UtcNow.AddDays(-4)
+                    CreatedAt = DateTime.UtcNow.AddDays(-4),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -269,7 +293,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 159.99m,
                     StockQuantity = 12,
                     CategoryId = 4,
-                    CreatedAt = DateTime.UtcNow.AddDays(-3)
+                    CreatedAt = DateTime.UtcNow.AddDays(-3),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -278,7 +303,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 24.99m,
                     StockQuantity = 55,
                     CategoryId = 4,
-                    CreatedAt = DateTime.UtcNow.AddDays(-2)
+                    CreatedAt = DateTime.UtcNow.AddDays(-2),
+                    ProductPicture = PlaceholderImage
                 },
 
                 
@@ -289,7 +315,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 39.99m,
                     StockQuantity = 45,
                     CategoryId = 5,
-                    CreatedAt = DateTime.UtcNow.AddDays(-1)
+                    CreatedAt = DateTime.UtcNow.AddDays(-1),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -298,7 +325,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 44.99m,
                     StockQuantity = 32,
                     CategoryId = 5,
-                    CreatedAt = DateTime.UtcNow.AddHours(-20)
+                    CreatedAt = DateTime.UtcNow.AddHours(-20),
+                    ProductPicture = PlaceholderImage
                 },
 
                 
@@ -309,7 +337,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 89.99m,
                     StockQuantity = 28,
                     CategoryId = 6,
-                    CreatedAt = DateTime.UtcNow.AddHours(-15)
+                    CreatedAt = DateTime.UtcNow.AddHours(-15),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -318,7 +347,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 499.99m,
                     StockQuantity = 5,
                     CategoryId = 6,
-                    CreatedAt = DateTime.UtcNow.AddHours(-10)
+                    CreatedAt = DateTime.UtcNow.AddHours(-10),
+                    ProductPicture = PlaceholderImage
                 },
 
                 
@@ -329,7 +359,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 19.99m,
                     StockQuantity = 150,
                     CategoryId = 7,
-                    CreatedAt = DateTime.UtcNow.AddHours(-5)
+                    CreatedAt = DateTime.UtcNow.AddHours(-5),
+                    ProductPicture = PlaceholderImage
                 },
                 new Product
                 {
@@ -338,7 +369,8 @@ namespace Walmart.Infrastructure.Data
                     Price = 14.99m,
                     StockQuantity = 200,
                     CategoryId = 7,
-                    CreatedAt = DateTime.UtcNow.AddHours(-2)
+                    CreatedAt = DateTime.UtcNow.AddHours(-2),
+                    ProductPicture = PlaceholderImage
                 }
             };
 
@@ -468,36 +500,87 @@ namespace Walmart.Infrastructure.Data
             var orderProducts = new List<OrderProduct>();
 
             
-            orderProducts.Add(new OrderProduct { OrderId = order1.Id, ProductId = products[0].Id }); 
-            orderProducts.Add(new OrderProduct { OrderId = order1.Id, ProductId = products[6].Id }); 
+            orderProducts.Add(new OrderProduct { OrderId = order1.Id, ProductId = products[0].Id, Quantity = 1, UnitPrice = products[0].Price, LineTotal = products[0].Price }); 
+            orderProducts.Add(new OrderProduct { OrderId = order1.Id, ProductId = products[6].Id, Quantity = 1, UnitPrice = products[6].Price, LineTotal = products[6].Price }); 
 
             
-            orderProducts.Add(new OrderProduct { OrderId = order2.Id, ProductId = products[12].Id }); 
-            orderProducts.Add(new OrderProduct { OrderId = order2.Id, ProductId = products[8].Id }); 
+            orderProducts.Add(new OrderProduct { OrderId = order2.Id, ProductId = products[12].Id, Quantity = 1, UnitPrice = products[12].Price, LineTotal = products[12].Price }); 
+            orderProducts.Add(new OrderProduct { OrderId = order2.Id, ProductId = products[8].Id, Quantity = 1, UnitPrice = products[8].Price, LineTotal = products[8].Price }); 
 
             
             if (order3 != null)
             {
-                orderProducts.Add(new OrderProduct { OrderId = order3.Id, ProductId = products[2].Id }); 
+                orderProducts.Add(new OrderProduct { OrderId = order3.Id, ProductId = products[2].Id, Quantity = 1, UnitPrice = products[2].Price, LineTotal = products[2].Price }); 
             }
 
             
             if (order4 != null)
             {
-                orderProducts.Add(new OrderProduct { OrderId = order4.Id, ProductId = products[17].Id }); 
-                orderProducts.Add(new OrderProduct { OrderId = order4.Id, ProductId = products[9].Id }); 
+                orderProducts.Add(new OrderProduct { OrderId = order4.Id, ProductId = products[17].Id, Quantity = 2, UnitPrice = products[17].Price, LineTotal = products[17].Price * 2 }); 
+                orderProducts.Add(new OrderProduct { OrderId = order4.Id, ProductId = products[9].Id, Quantity = 1, UnitPrice = products[9].Price, LineTotal = products[9].Price }); 
             }
 
             
             if (order5 != null)
             {
-                orderProducts.Add(new OrderProduct { OrderId = order5.Id, ProductId = products[11].Id }); 
-                orderProducts.Add(new OrderProduct { OrderId = order5.Id, ProductId = products[15].Id }); 
-                orderProducts.Add(new OrderProduct { OrderId = order5.Id, ProductId = products[5].Id }); 
+                orderProducts.Add(new OrderProduct { OrderId = order5.Id, ProductId = products[11].Id, Quantity = 1, UnitPrice = products[11].Price, LineTotal = products[11].Price }); 
+                orderProducts.Add(new OrderProduct { OrderId = order5.Id, ProductId = products[15].Id, Quantity = 1, UnitPrice = products[15].Price, LineTotal = products[15].Price }); 
+                orderProducts.Add(new OrderProduct { OrderId = order5.Id, ProductId = products[5].Id, Quantity = 1, UnitPrice = products[5].Price, LineTotal = products[5].Price }); 
             }
 
             await _context.Set<OrderProduct>().AddRangeAsync(orderProducts);
             await _context.SaveChangesAsync();
+        }
+
+        private async Task EnsureRoleUserAsync(string role, string email, string firstName, string lastName, string password)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user is null)
+            {
+                user = new ApplicationUser
+                {
+                    UserName = email,
+                    Email = email,
+                    EmailConfirmed = true,
+                    FirstName = firstName,
+                    LastName = lastName,
+                    ProfilePicture = PlaceholderImage
+                };
+
+                var create = await _userManager.CreateAsync(user, password);
+                if (!create.Succeeded)
+                    return;
+            }
+
+            if (!await _userManager.IsInRoleAsync(user, role))
+                await _userManager.AddToRoleAsync(user, role);
+        }
+
+        private async Task EnsureProfilePicturesAsync()
+        {
+            var users = await _userManager.Users.Where(u => u.ProfilePicture == null).ToListAsync();
+            if (!users.Any())
+                return;
+
+            foreach (var user in users)
+                user.ProfilePicture = PlaceholderImage;
+
+            _context.UpdateRange(users);
+        }
+
+        private async Task EnsureProductPicturesAsync()
+        {
+            var productsWithoutImage = await _context.Set<Product>()
+                .Where(p => p.ProductPicture == null)
+                .ToListAsync();
+
+            if (!productsWithoutImage.Any())
+                return;
+
+            foreach (var product in productsWithoutImage)
+                product.ProductPicture = PlaceholderImage;
+
+            _context.UpdateRange(productsWithoutImage);
         }
     }
 }

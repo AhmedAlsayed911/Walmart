@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Walmart.Application;
 using Walmart.Domain.Entities;
 using Walmart.Infrastructure;
 using Walmart.Infrastructure.Data;
+using Walmart.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,7 @@ builder.Services.AddSession(options =>
 });
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IClientOrderNotificationService, ClientOrderNotificationService>();
 
 builder.Services
     .AddApplicationDependencies()
@@ -66,7 +68,7 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/Home/Error");
-    
+
     app.UseHsts();
 }
 app.UseHttpsRedirection();
@@ -87,3 +89,5 @@ app.MapRazorPages()
    .WithStaticAssets();
 
 app.Run();
+
+// Antigravity connection test: Successful! Working as expected.

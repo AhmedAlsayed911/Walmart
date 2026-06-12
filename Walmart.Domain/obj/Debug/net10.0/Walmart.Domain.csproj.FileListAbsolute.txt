@@ -10,3 +10,4 @@ C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\ne
 C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\refint\Walmart.Domain.dll
 C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.pdb
 C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\ref\Walmart.Domain.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Domain\obj\Debug\net10.0\Walmart.Domain.sourcelink.json

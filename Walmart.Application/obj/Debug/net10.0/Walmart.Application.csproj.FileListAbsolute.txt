@@ -1,0 +1,16 @@
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\bin\Debug\net10.0\Walmart.Application.deps.json
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\bin\Debug\net10.0\Walmart.Application.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\bin\Debug\net10.0\Walmart.Application.pdb
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\bin\Debug\net10.0\Walmart.Domain.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\bin\Debug\net10.0\Walmart.Domain.pdb
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart.Application.csproj.AssemblyReference.cache
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart.Application.AssemblyInfoInputs.cache
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart.Application.AssemblyInfo.cs
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart.Application.csproj.CoreCompileInputs.cache
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart..4D529CC7.Up2Date
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart.Application.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\refint\Walmart.Application.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart.Application.pdb
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\ref\Walmart.Application.dll
+C:\Users\ka\Desktop\ITI\ASP.NET-MVC\Projects\Walmart\Walmart.Application\obj\Debug\net10.0\Walmart.Application.sourcelink.json

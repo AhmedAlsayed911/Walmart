@@ -14,8 +14,11 @@
         <nav class="navbar navbar-expand-lg navbar-custom mb-5">
             <div class="container">
                 <a class="navbar-brand-custom" asp-area="" asp-controller="Home" asp-action="Index">
-                    <div class="navbar-logo-circle">W</div>
-                    <span>Walmart</span>
+                    <svg class="navbar-logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" fill="#E6F0FF" stroke="#0052CC" stroke-width="2"/>
+                        <path d="M7 9l3 6 2-4 2 4 3-6" stroke="#0052CC" stroke-width="2.5"/>
+                    </svg>
+                    <span class="brand-text">Walmart</span>
                 </a>
                 <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
@@ -81,8 +84,11 @@
             <div class="row align-items-center py-2">
                 <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
                     <div class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                        <div class="navbar-logo-circle" style="width: 28px; height: 28px; font-size: 0.95rem; box-shadow: none;">W</div>
-                        <span class="fw-bold text-dark">Walmart</span>
+                        <svg class="navbar-logo-svg" style="width: 28px; height: 28px;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" fill="#E6F0FF" stroke="#0052CC" stroke-width="2"/>
+                            <path d="M7 9l3 6 2-4 2 4 3-6" stroke="#0052CC" stroke-width="2.5"/>
+                        </svg>
+                        <span class="fw-bold brand-text" style="font-size: 1.2rem; letter-spacing: -0.5px;">Walmart</span>
                         <span class="text-muted ms-2">| &copy; 2026 All rights reserved.</span>
                     </div>
                 </div>
@@ -114,6 +120,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 10000;"></div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

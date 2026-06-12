@@ -16,9 +16,16 @@ namespace Walmart.Application.Features.Category.Queries.Handlers
     {
         public async Task<PaginatedResult<CategoryListVM>> Handle(GetAllCategoriesQuery request, CancellationToken cancellationToken)
         {
+            var query = repository.GetTableNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(request.Search))
+            {
+                var search = request.Search.Trim().ToLower();
+                query = query.Where(c => c.Name.ToLower().Contains(search));
+            }
+
             return await
-                repository
-                .GetTableNoTracking()
+                query
                 .ProjectTo<CategoryListVM>(mapper.ConfigurationProvider)
                 .ToPaginatedListAsync(request.PageNumber, request.PageSize, cancellationToken);
         }

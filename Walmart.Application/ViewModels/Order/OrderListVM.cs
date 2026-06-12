@@ -10,5 +10,15 @@
         public DateTime OrderDate { get; set; }
         public decimal TotalAmount { get; set; }
         public int ProductCount { get; set; }
+        public bool CanEdit { get; set; }
+        public List<OrderListItemVM> Items { get; set; } = new();
+    }
+
+    public class OrderListItemVM
+    {
+        public string ProductName { get; set; }
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal LineTotal { get; set; }
     }
 }

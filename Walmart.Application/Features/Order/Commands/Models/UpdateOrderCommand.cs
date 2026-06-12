@@ -19,5 +19,7 @@ namespace Walmart.Application.Features.Order.Commands.Models
         public int Status { get; set; }
         
         public decimal TotalAmount { get; set; }
+
+        public List<int> ProductIds { get; set; } = new();
     }
 }

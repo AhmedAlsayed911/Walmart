@@ -1,0 +1,18 @@
+[
+  {
+    "ContainingType": "Walmart.Controllers.ProductsController",
+    "Method": "GetProductsByCategory",
+    "RelativePath": "api/Products/category/{categoryId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "categoryId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

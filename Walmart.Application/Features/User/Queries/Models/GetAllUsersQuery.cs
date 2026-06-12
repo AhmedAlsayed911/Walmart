@@ -5,5 +5,6 @@ namespace Walmart.Application.Features.User.Queries.Models
 {
     public class GetAllUsersQuery : IRequest<List<UserViewModel>>
     {
+        public string? Search { get; set; }
     }
 }

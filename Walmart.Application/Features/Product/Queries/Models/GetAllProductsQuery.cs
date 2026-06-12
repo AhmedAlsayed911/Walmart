@@ -9,6 +9,9 @@ namespace Walmart.Application.Features.Product.Queries.Models
         public int PageNumber { get; set; } = 1;
         public int PageSize { get; set; } = 10;
         public string? Search { get; set; }
+        public string? CategoryName { get; set; }
+        public bool? IsActive { get; set; }
+        public string? StockStatus { get; set; }
         public string? SortBy { get; set; }
 
     }

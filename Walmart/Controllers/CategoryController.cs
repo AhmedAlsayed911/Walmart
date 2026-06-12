@@ -12,7 +12,11 @@ namespace Walmart.Controllers
     {
         public async Task<IActionResult> Index(int page = 1)
         {
-            var categories = await mediator.Send(new GetAllCategoriesQuery { PageNumber = page, PageSize = 10 });
+            var categories = await mediator.Send(new GetAllCategoriesQuery
+            {
+                PageNumber = page,
+                PageSize = 10
+            });
             return View(categories);
         }
 
@@ -141,9 +145,16 @@ namespace Walmart.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int id)
         {
+            var existing = await mediator.Send(new GetCategoryByIdQuery { Id = id });
+            if (existing is null)
+                return NotFound();
+
             var result = await mediator.Send(new DeleteCategoryCommand { Id = id });
             if (!result)
-                return NotFound();
+            {
+                TempData["ErrorMessage"] = "This category cannot be deleted because it has products.";
+                return RedirectToAction(nameof(Index));
+            }
 
             return RedirectToAction(nameof(Index));
         }

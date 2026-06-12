@@ -13,7 +13,7 @@
             <div class="col-lg-8">
                 @foreach (var item in Model.Items)
                 {
-                    <div class="card mb-3 shadow-sm">
+                    <div class="card mb-3 shadow-sm" id="cart-item-@item.ProductId">
                         <div class="card-body">
                             <div class="row align-items-center">
                                 <div class="col-md-2">
@@ -24,8 +24,8 @@
                                              alt="@item.ProductName" />
                                     }
                                     else
-                                        {
-                                            <img src="~/Images/DefaultProduct.jpg" 
+                                    {
+                                        <img src="~/Images/DefaultProduct.jpg" 
                                              class="img-fluid rounded" 
                                              alt="@item.ProductName" />
                                     }
@@ -36,13 +36,13 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="input-group">
-                                        <button class="btn btn-outline-secondary" type="button" onclick="updateQuantity(@item.ProductId, @item.Quantity - 1)">-</button>
-                                        <input type="number" class="form-control text-center" value="@item.Quantity" min="1" readonly />
-                                        <button class="btn btn-outline-secondary" type="button" onclick="updateQuantity(@item.ProductId, @item.Quantity + 1)">+</button>
+                                        <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(@item.ProductId, -1)">-</button>
+                                        <input type="number" class="form-control text-center" value="@item.Quantity" min="1" readonly id="item-quantity-@item.ProductId" data-price="@item.Price" />
+                                        <button class="btn btn-outline-secondary" type="button" onclick="changeQuantity(@item.ProductId, 1)">+</button>
                                     </div>
                                 </div>
                                 <div class="col-md-2">
-                                    <p class="fw-bold text-success mb-0">$@item.Total.ToString("N2")</p>
+                                    <p class="fw-bold text-success mb-0" id="item-total-@item.ProductId">$@item.Total.ToString("N2")</p>
                                 </div>
                                 <div class="col-md-1">
                                     <button class="btn btn-danger btn-sm" onclick="removeFromCart(@item.ProductId)">
@@ -76,7 +76,7 @@
 
                         <div class="d-flex justify-content-between mb-2">
                             <span>Tax (10%):</span>
-                            <span>$@Model.Tax.ToString("N2")</span>
+                            <span id="tax">$@Model.Tax.ToString("N2")</span>
                         </div>
 
                         <hr />
@@ -110,34 +110,83 @@
 @section Scripts {
     <script>
         function updateQuantity(productId, quantity) {
+            const input = document.getElementById(`item-quantity-${productId}`);
+            if (input) input.disabled = true;
+
             $.ajax({
                 url: '@Url.Action("UpdateQuantity", "Cart")',
                 type: 'POST',
                 data: { productId: productId, quantity: quantity },
                 success: function(result) {
+                    if (input) input.disabled = false;
                     if (result.success) {
-                        location.reload();
+                        if (input) {
+                            input.value = quantity;
+                            const price = parseFloat(input.dataset.price);
+                            const lineTotal = price * quantity;
+                            document.getElementById(`item-total-${productId}`).textContent = `$${lineTotal.toFixed(2)}`;
+                        }
+                        
+                        document.getElementById('subtotal').textContent = `$${result.subTotal.toFixed(2)}`;
+                        const tax = result.subTotal * 0.1;
+                        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+                        document.getElementById('grandtotal').textContent = `$${result.grandTotal.toFixed(2)}`;
+                        $('#cart-count').text(result.cartCount);
+                        
+                        window.showToast("Cart updated successfully!", "success");
+                    } else {
+                        window.showToast(result.message || "Could not update quantity.", "danger");
                     }
                 },
                 error: function() {
-                    alert('Error updating quantity');
+                    if (input) input.disabled = false;
+                    window.showToast("Error updating cart quantity.", "danger");
                 }
             });
+        }
+
+        function changeQuantity(productId, diff) {
+            const input = document.getElementById(`item-quantity-${productId}`);
+            if (!input) return;
+            const currentVal = parseInt(input.value);
+            const newVal = currentVal + diff;
+            if (newVal >= 1) {
+                updateQuantity(productId, newVal);
+            }
         }
 
         function removeFromCart(productId) {
             window.showConfirmModal("Remove Item", "Remove this item from cart?", function() {
                 $.ajax({
-                    url: '@Url.Action("RemoveFromCart", "Cart")',
+                    url: '@Url.Action("UpdateQuantity", "Cart")',
                     type: 'POST',
-                    data: { productId: productId },
+                    data: { productId: productId, quantity: 0 },
                     success: function(result) {
                         if (result.success) {
-                            location.reload();
+                            const itemCard = document.getElementById(`cart-item-${productId}`);
+                            if (itemCard) {
+                                itemCard.style.transition = "all 0.3s ease";
+                                itemCard.style.opacity = "0";
+                                itemCard.style.transform = "translateX(-20px)";
+                                setTimeout(() => {
+                                    itemCard.remove();
+                                    
+                                    if (result.cartCount === 0) {
+                                        location.reload();
+                                    } else {
+                                        document.getElementById('subtotal').textContent = `$${result.subTotal.toFixed(2)}`;
+                                        const tax = result.subTotal * 0.1;
+                                        document.getElementById('tax').textContent = `$${tax.toFixed(2)}`;
+                                        document.getElementById('grandtotal').textContent = `$${result.grandTotal.toFixed(2)}`;
+                                        $('#cart-count').text(result.cartCount);
+                                        window.showToast("Item removed from cart.", "success");
+                                    }
+                                }, 300);
+                            }
                         }
                     },
                     error: function() {
-                        alert('Error removing item');
+                        window.showToast("Error removing item.", "danger");
                     }
                 });
             });
@@ -150,16 +199,18 @@
                     type: 'POST',
                     success: function(result) {
                         if (result.success) {
-                            location.reload();
+                            window.showToast("Cart cleared.", "success");
+                            setTimeout(() => {
+                                location.reload();
+                            }, 500);
                         }
                     },
                     error: function() {
-                        alert('Error clearing cart');
+                        window.showToast("Error clearing cart.", "danger");
                     }
                 });
             });
         }
-
         
         $(document).ready(function() {
             $.ajax({
