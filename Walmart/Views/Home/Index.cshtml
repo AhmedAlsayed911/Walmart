@@ -1,65 +1,286 @@
-﻿@{
+@model List<ProductsListVM>
+@using Microsoft.AspNetCore.Identity
+@using Walmart.Domain.Entities
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
     ViewData["Title"] = "Home Page";
+    var appUser = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
+    var badgeClasses = new[] { "badge-orange", "badge-purple", "badge-blue", "badge-green", "badge-orange-dark", "badge-pink" };
+    var badgeIcons = new[] { "🔥", "✨", "💎", "🏷️", "🚚", "✅" };
+    int index = 0;
 }
 
-<div class="bg-light py-5 mb-5">
-    <div class="container text-center">
-        <h1 class="display-3 fw-bold">Welcome to Walmart</h1>
-        <p class="lead">Shop the best products at unbeatable prices</p>
-        <div class="mt-4">
-            <a asp-controller="Product" asp-action="Index" class="btn btn-primary btn-lg me-2">
-                🛍️ Shop Now
+<div class="hero-split-container">
+    <!-- Left Orange Column -->
+    <div class="hero-brand-card">
+        <div>
+            <h1 class="display-4 fw-extrabold text-white mb-2" style="font-weight: 800;">Looking For Value?</h1>
+            <p class="lead text-white-50 mb-0" style="font-size: 1.2rem;">Join Walmart and get unbeatable deals in your city. Start saving more today.</p>
+        </div>
+
+        <div class="hero-features-grid">
+            <div class="hero-feature-box">
+                <div class="hero-feature-icon-wrapper">🏷️</div>
+                <div class="hero-feature-text">Get More Deals</div>
+            </div>
+            <div class="hero-feature-box">
+                <div class="hero-feature-icon-wrapper">💰</div>
+                <div class="hero-feature-text">Save More</div>
+            </div>
+            <div class="hero-feature-box">
+                <div class="hero-feature-icon-wrapper">⭐</div>
+                <div class="hero-feature-text">Build Points</div>
+            </div>
+            <div class="hero-feature-box">
+                <div class="hero-feature-icon-wrapper">🚚</div>
+                <div class="hero-feature-text">Express Delivery</div>
+            </div>
+        </div>
+
+        <div class="hero-subscription-card text-white">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <span>🛡️</span>
+                <span class="fw-bold uppercase tracking-wider text-white-50" style="font-size: 0.85rem; letter-spacing: 1px;">MEMBERSHIP PLAN</span>
+            </div>
+            <div class="subscription-price-row">
+                <span class="subscription-price">$9.99</span>
+                <span class="text-white-50">/ 3 months</span>
+            </div>
+            <ul class="subscription-features-list">
+                <li>Unlimited free delivery in your area</li>
+                <li>Verified member badge on profile</li>
+                <li>Direct savings at checkout</li>
+                <li>Priority slot booking</li>
+                <li>WhatsApp deal alerts</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Right Column Panel -->
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <div class="hero-right-panel">
+            <h3>Join as a Member</h3>
+            <p class="subtitle">Fill in your details — we'll reach out with welcome benefits</p>
+            
+            <div class="profile-upload-mock">
+                <div class="profile-upload-circle">👤</div>
+                <div class="profile-upload-text">Upload your profile photo</div>
+            </div>
+
+            <div class="mock-form-group">
+                <span class="mock-form-icon">👤</span>
+                <input type="text" class="mock-form-input" placeholder="Full Name *" disabled />
+            </div>
+
+            <div class="mock-form-group">
+                <span class="mock-form-icon">📞</span>
+                <input type="text" class="mock-form-input" placeholder="WhatsApp Number *" disabled />
+            </div>
+
+            <div class="mock-form-group">
+                <span class="mock-form-icon">✉️</span>
+                <input type="email" class="mock-form-input" placeholder="Email Address (optional)" disabled />
+            </div>
+
+            <div class="mock-form-group">
+                <span class="mock-form-icon">📍</span>
+                <input type="text" class="mock-form-input" placeholder="Your City *" disabled />
+            </div>
+
+            <div class="mock-form-group">
+                <span class="mock-form-icon">🛍️</span>
+                <select class="mock-form-input mock-form-select" disabled>
+                    <option selected disabled>Select Primary Category *</option>
+                    <option>Grocery & Fresh Food</option>
+                    <option>Electronics & Gadgets</option>
+                    <option>Home & Kitchen</option>
+                    <option>Fashion & Apparel</option>
+                </select>
+            </div>
+
+            <div class="mock-switch-container">
+                <span class="mock-switch-label">Receive Alerts</span>
+                <div class="mock-switch-btn">
+                    <span class="mock-switch-text">ON</span>
+                    <div class="mock-switch-knob"></div>
+                </div>
+            </div>
+
+            <a asp-area="Identity" asp-page="/Account/Register" class="btn-orange-pill text-center py-3 w-100 fs-5 mt-2 shadow">
+                Register Now
             </a>
-            @if (!User.Identity.IsAuthenticated)
+        </div>
+    }
+    else
+    {
+        <div class="hero-right-panel">
+            <div class="welcome-panel">
+                <div class="welcome-header">
+                    <div class="welcome-avatar-wrapper">
+                        @if (appUser?.ProfilePicture is not null)
+                        {
+                            <img class="welcome-avatar" src="data:image/png;base64,@(Convert.ToBase64String(appUser.ProfilePicture))" alt="profile" />
+                        }
+                        else
+                        {
+                            <img class="welcome-avatar" src="~/Images/profilepic.jpg" alt="profile" />
+                        }
+                        <div class="welcome-status-badge"></div>
+                    </div>
+                    <div class="welcome-title-desc">
+                        <h4>Hello, @(appUser != null ? appUser.FirstName + " " + appUser.LastName : User.Identity?.Name)!</h4>
+                        <p>Active Member</p>
+                    </div>
+                </div>
+                
+                <div class="welcome-actions-grid mt-3">
+                    <a asp-controller="Product" asp-action="Index" class="welcome-action-card">
+                        <span class="welcome-action-icon">🛍️</span>
+                        <span class="welcome-action-title">Browse Store</span>
+                    </a>
+                    <a asp-controller="Cart" asp-action="Index" class="welcome-action-card">
+                        <span class="welcome-action-icon">🛒</span>
+                        <span class="welcome-action-title">View Cart</span>
+                    </a>
+                    <a asp-controller="Order" asp-action="MyOrders" class="welcome-action-card">
+                        <span class="welcome-action-icon">📦</span>
+                        <span class="welcome-action-title">My Orders</span>
+                    </a>
+                    <a asp-area="Identity" asp-page="/Account/Manage/Index" class="welcome-action-card">
+                        <span class="welcome-action-icon">⚙️</span>
+                        <span class="welcome-action-title">Settings</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="container-fluid px-0 mb-5">
+    <div class="section-title-container">
+        <h2 class="section-title">Most Sold <span>Products</span></h2>
+        <p class="section-subtitle">Best sellers picked from real order history.</p>
+    </div>
+
+    <div class="row g-4 mb-5 justify-content-center">
+        @if (Model.Any())
+        {
+            foreach (var item in Model)
             {
-                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-outline-primary btn-lg">
-                    Create Account
-                </a>
+                var currentBadgeClass = badgeClasses[index % badgeClasses.Length];
+                var currentBadgeIcon = badgeIcons[index % badgeIcons.Length];
+                index++;
+
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3 col-xl-2">
+                    <div class="premium-card-container">
+                        <div class="premium-card-badge @currentBadgeClass">@currentBadgeIcon</div>
+                        
+                        @if (item.ProductPicture != null)
+                        {
+                            <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductPicture)" class="premium-card-image" alt="@item.Name" />
+                        }
+                        else
+                        {
+                            <img src="~/Images/DefaultProduct.jpg" class="premium-card-image" alt="@item.Name" />
+                        }
+                        
+                        <div class="premium-card-overlay">
+                            <h3 class="premium-card-title text-truncate">@item.Name</h3>
+                            <div class="premium-card-subtitle">Ref: @PublicIdFormatter.ToPublicGuid(item.Id)</div>
+
+                            @if (item.HasActiveSale)
+                            {
+                                <div class="mb-3">
+                                    <span class="text-white-50 text-decoration-line-through me-1" style="font-size: 0.95rem;">$@item.Price.ToString("N2")</span>
+                                    <span class="text-warning fw-bold fs-5">$@item.EffectivePrice.ToString("N2")</span>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-warning fw-bold fs-5 mb-3">$@item.Price.ToString("N2")</div>
+                            }
+
+                            <div class="premium-card-btn-container">
+                                <a asp-controller="Product" asp-action="Details" asp-route-id="@item.Id" class="premium-card-btn">Details</a>
+                                @if (User.IsInRole("Client"))
+                                {
+                                    <button type="button" class="premium-card-btn premium-card-btn-primary add-to-cart-btn" data-product-id="@item.Id">Add</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
             }
+        }
+        else
+        {
+            <div class="col-12 text-center py-4">
+                <div class="alert alert-info d-inline-block px-5">No products are available right now.</div>
+            </div>
+        }
+    </div>
+
+    <!-- Slogans Section -->
+    <div class="row text-center g-4 mt-5">
+        <div class="col-md-4">
+            <div class="modern-slogan-card h-100">
+                <span class="slogan-icon-container">🚚</span>
+                <h5 class="fw-bold text-dark mb-2">Fast Delivery</h5>
+                <p class="text-muted mb-0">Get your products delivered quickly to your doorstep.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="modern-slogan-card h-100">
+                <span class="slogan-icon-container">💰</span>
+                <h5 class="fw-bold text-dark mb-2">Best Prices</h5>
+                <p class="text-muted mb-0">Competitive pricing across our full catalog.</p>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="modern-slogan-card h-100">
+                <span class="slogan-icon-container">🛡️</span>
+                <h5 class="fw-bold text-dark mb-2">Quality Guaranteed</h5>
+                <p class="text-muted mb-0">Authentic products with quality assurance.</p>
+            </div>
         </div>
     </div>
 </div>
 
-<div class="container">
-    <div class="row text-center mb-5">
-        <div class="col-md-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="display-4 mb-3">🚚</div>
-                    <h4>Fast Delivery</h4>
-                    <p class="text-muted">Get your products delivered quickly to your doorstep</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="display-4 mb-3">💰</div>
-                    <h4>Best Prices</h4>
-                    <p class="text-muted">Competitive pricing on all our products</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4 mb-4">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body p-4">
-                    <div class="display-4 mb-3">✅</div>
-                    <h4>Quality Guaranteed</h4>
-                    <p class="text-muted">100% authentic products with warranty</p>
-                </div>
-            </div>
-        </div>
-    </div>
+@section Scripts {
+    <script>
+        document.querySelectorAll('.add-to-cart-btn').forEach((button) => {
+            button.addEventListener('click', async () => {
+                const productId = button.getAttribute('data-product-id');
+                const response = await fetch('/Cart/AddToCart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ productId, quantity: '1' })
+                });
 
-    <div class="text-center mb-4">
-        <h2 class="mb-4">Popular Categories</h2>
-        <div class="d-flex justify-content-center gap-3 flex-wrap">
-            <a asp-controller="Category" asp-action="Index" class="btn btn-outline-dark">
-                📂 All Categories
-            </a>
-            <a asp-controller="Product" asp-action="Index" class="btn btn-outline-dark">
-                🛍️ View All Products
-            </a>
-        </div>
-    </div>
-</div>
+                const data = await response.json();
+                if (data.success) {
+                    button.textContent = 'Added';
+                    button.classList.remove('premium-card-btn-primary');
+                    button.classList.add('btn-outline-success');
+                    
+                    // Trigger the AJAX call from Layout to update badge count
+                    if (window.jQuery) {
+                        $.ajax({
+                            url: '/Cart/GetCartCount',
+                            type: 'GET',
+                            success: function(result) {
+                                $('#cart-count').text(result.count);
+                            }
+                        });
+                    }
+                }
+                else {
+                    alert(data.message || 'Could not add product to cart.');
+                }
+            });
+        });
+    </script>
+}

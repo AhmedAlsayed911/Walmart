@@ -28,8 +28,8 @@
 
                     <div class="row mb-3">
                         <div class="col-md-4">
-                            <strong>Category ID:</strong>
-                            <p>@Model.Id</p>
+                            <strong>Reference:</strong>
+                            <p>@PublicIdFormatter.ToPublicGuid(Model.Id)</p>
                         </div>
                         <div class="col-md-4">
                             <strong>Parent Category:</strong>
@@ -106,7 +106,7 @@
         function createProductCard(product) {
             var imageHtml = product.productPicture
                 ? `<img src="data:image/png;base64,${product.productPicture}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${product.name}">`
-                : `<img src="/images/DefaultProduct.jpg" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${product.name}">`;
+                : `<img src="/Images/DefaultProduct.jpg" class="card-img-top" style="height: 200px; object-fit: cover;" alt="${product.name}">`;
 
             var stockBadge = product.stockQuantity > 10
                 ? '<span class="badge bg-success">In Stock</span>'
@@ -114,7 +114,7 @@
                 ? '<span class="badge bg-warning text-dark">Low Stock</span>'
                 : '<span class="badge bg-danger">Out of Stock</span>';
 
-            var addToCartBtn = product.stockQuantity > 0 && @(User.Identity.IsAuthenticated ? "true" : "false")
+            var addToCartBtn = product.stockQuantity > 0 && @(User.IsInRole("Client") ? "true" : "false")
                 ? `<button onclick="addToCart(${product.id})" class="btn btn-success btn-sm mt-2 w-100">🛒 Add to Cart</button>`
                 : product.stockQuantity > 0
                 ? `<a href="/Identity/Account/Login" class="btn btn-primary btn-sm mt-2 w-100">Login to Purchase</a>`

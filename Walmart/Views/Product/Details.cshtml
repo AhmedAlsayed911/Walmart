@@ -17,7 +17,7 @@
                 }
                 else
                 {
-                    <img src="~/images/DefaultProduct.jpg" 
+                    <img src="~/Images/DefaultProduct.jpg" 
                          class="card-img-top" 
                          alt="@Model.Name" 
                          style="height: 400px; object-fit: cover;" />
@@ -29,10 +29,23 @@
             <div class="card border-0 shadow-lg">
                 <div class="card-body p-4">
                     <h2 class="card-title mb-3">@Model.Name</h2>
+                    <div class="mb-3">
+                        <small class="text-muted">Reference: @PublicIdFormatter.ToPublicGuid(Model.Id)</small>
+                    </div>
                     
-                    <span class="badge bg-primary mb-3 fs-6">@Model.CategoryName</span>
-                    
-                    <h3 class="text-success mb-4">$@Model.Price.ToString("N2")</h3>
+                    @if (Model.HasActiveSale)
+                    {
+                        <div class="mb-4">
+                            <div class="text-muted text-decoration-line-through">$@Model.Price.ToString("N2")</div>
+                            <h3 class="text-danger mb-1">$@Model.EffectivePrice.ToString("N2")</h3>
+                            <span class="badge bg-danger mb-1">@Model.SalePercentage% OFF</span>
+                            <div class="small text-muted">Ends @Model.SaleEndDate?.ToLocalTime().ToString("MMM dd, yyyy hh:mm tt")</div>
+                        </div>
+                    }
+                    else
+                    {
+                        <h3 class="text-success mb-4">$@Model.Price.ToString("N2")</h3>
+                    }
                     
                     <div class="mb-3">
                         <strong>SKU:</strong> @Model.Sku
@@ -60,7 +73,7 @@
                     
                     <hr />
                     
-                    @if (User.Identity.IsAuthenticated && Model.IsActive)
+                    @if (User.IsInRole("Client") && Model.IsActive)
                     {
                         <form id="addToCartForm" class="mb-3">
                             <div class="input-group mb-3" style="max-width: 200px;">
@@ -81,6 +94,12 @@
                             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning flex-fill">
                                 ✏️ Edit
                             </a>
+                            <a asp-action="Sale" asp-route-id="@Model.Id" class="btn btn-info text-white flex-fill">
+                                💸 Sale
+                            </a>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-2">
                             <form asp-action="Delete" asp-route-id="@Model.Id" method="post" class="flex-fill" onsubmit="return confirm('Are you sure you want to delete this product?');">
                                 <button type="submit" class="btn btn-danger w-100">
                                     🗑️ Delete

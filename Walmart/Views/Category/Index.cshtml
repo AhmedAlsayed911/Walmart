@@ -1,11 +1,56 @@
-﻿@model PaginatedResult<CategoryListVM>
+@model PaginatedResult<CategoryListVM>
 
 @{
     ViewData["Title"] = "Categories";
+
+    string GetCategoryImage(string name)
+    {
+        var key = name?.Trim().ToLowerInvariant();
+        return key switch
+        {
+            "electronics" => "/Images/categories/electronics.svg",
+            "clothing" => "/Images/categories/clothing.svg",
+            "home & garden" => "/Images/categories/home-garden.svg",
+            "sports & outdoors" => "/Images/categories/sports.svg",
+            "books" => "/Images/categories/books.svg",
+            "toys & games" => "/Images/categories/toys.svg",
+            "food & grocery" => "/Images/categories/grocery.svg",
+            _ => "/Images/categories/default.svg"
+        };
+    }
+    var badgeClasses = new[] { "badge-orange", "badge-purple", "badge-blue", "badge-green", "badge-orange-dark", "badge-pink" };
+    var badgeIcons = new[] { "📂", "✨", "💎", "🏷️", "🚚", "✅" };
+    int idx = 0;
 }
 
 <div class="container mt-4">
     <h2 class="mb-4 text-center">📂 Categories</h2>
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <form class="row g-2 mb-3"
+          data-live-search-form="true"
+          data-search-mode="client"
+          data-filter-scope="#category-list"
+          data-filter-item-selector="[data-filter-item='true']"
+          data-filter-empty-state="#category-empty-state"
+          data-filter-pagination="#category-pagination">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Search categories by name" data-live-search-input="true" />
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-dark">Filter</button>
+        </div>
+        <div class="col-md-auto">
+            <button type="button" class="btn btn-outline-secondary" data-live-search-clear="true">Clear</button>
+        </div>
+    </form>
 
     @if (User.IsInRole("Admin"))
     {
@@ -16,54 +61,53 @@
         </div>
     }
 
-    <div class="row g-4">
+    <div class="row g-4" id="category-list">
         @if (Model.Items.Any())
         {
             foreach (var item in Model.Items)
             {
-                <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 shadow-sm border-0">
-                        <div class="card-body">
-                            <h5 class="card-title">@item.Name</h5>
+                <div class="col-md-6 col-lg-4" data-filter-item="true" data-search-text="@item.Name">
+                    <div class="premium-card-container">
+                        @{
+                            var currentBadgeClass = badgeClasses[idx % badgeClasses.Length];
+                            var currentBadgeIcon = badgeIcons[idx % badgeIcons.Length];
+                            idx++;
+                        }
+                        <div class="premium-card-badge @currentBadgeClass">@currentBadgeIcon</div>
+                        <img src="@GetCategoryImage(item.Name)" alt="@item.Name" class="premium-card-image" />
+                        <div class="premium-card-overlay">
+                            <h3 class="premium-card-title">@item.Name</h3>
+                            <div class="premium-card-subtitle">Browse Products</div>
 
-                            <div class="d-flex justify-content-between mt-3">
-                                <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-primary btn-sm">
-                                    View Details
-                                </a>
-
-                                @if (User.IsInRole("Admin"))
-                                {
-                                    <div class="btn-group" role="group">
-                                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-warning btn-sm">
-                                            ✏️ Edit
-                                        </a>
-                                        <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure?');">
-                                            <button type="submit" class="btn btn-danger btn-sm">
-                                                🗑️ Delete
-                                            </button>
-                                        </form>
-                                    </div>
-                                }
+                            <div class="premium-card-btn-container w-100 flex-wrap mt-2">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="premium-card-btn flex-fill text-center">View Details</a>
                             </div>
+
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <div class="d-flex gap-1 w-100 mt-2">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="premium-card-btn flex-fill text-center py-1 px-2" style="font-size: 0.75rem;">Edit</a>
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="flex-fill" onsubmit="return confirm('Are you sure?');">
+                                        <button type="submit" class="premium-card-btn premium-card-btn-primary w-100 py-1" style="font-size: 0.75rem; background-color: var(--color-danger); border-color: var(--color-danger);">Delete</button>
+                                    </form>
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
             }
         }
-        else
-        {
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    No categories found.
-                </div>
+        <div class="col-12 @(Model.Items.Any() ? "d-none" : string.Empty)" id="category-empty-state">
+            <div class="alert alert-info text-center mb-0">
+                @(Model.Items.Any() ? "No categories match your search." : "No categories found.")
             </div>
-        }
+        </div>
     </div>
 
     
     @if (Model.TotalPages > 1)
     {
-        <nav class="mt-4">
+        <nav class="mt-4" id="category-pagination">
             <ul class="pagination justify-content-center">
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {

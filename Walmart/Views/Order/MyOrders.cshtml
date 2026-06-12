@@ -15,6 +15,14 @@
         </div>
     }
 
+    @if (TempData["OrderNotice"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @Html.Raw(TempData["OrderNotice"])
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     <div class="card shadow-sm border-0">
         <div class="card-body">
             @if (Model.Items.Any())
@@ -47,10 +55,10 @@
                                                 <span class="badge bg-info">📦 Processing</span>
                                                 break;
                                             case 2:
-                                                <span class="badge bg-primary">🚚 Shipped</span>
+                                                <span class="badge bg-primary">🚚 On Way</span>
                                                 break;
                                             case 3:
-                                                <span class="badge bg-success">✅ Delivered</span>
+                                                <span class="badge bg-success">✅ Deleivered</span>
                                                 break;
                                             case 4:
                                                 <span class="badge bg-danger">❌ Cancelled</span>
@@ -62,9 +70,52 @@
                                     </td>
                                     <td class="text-success fw-bold">$@order.TotalAmount.ToString("N2")</td>
                                     <td>
-                                        <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-primary">
-                                            👁️ View Details
-                                        </a>
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-primary">
+                                                👁️ View Details
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="table-light">
+                                    <td colspan="6">
+                                        <div class="small text-muted mb-2">Order lines:</div>
+                                        @if (order.Items.Any())
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table table-sm mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Product</th>
+                                                            <th class="text-center">Qty</th>
+                                                            <th class="text-end">Unit Price</th>
+                                                            <th class="text-end">Line Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var line in order.Items)
+                                                        {
+                                                            <tr>
+                                                                <td>@line.ProductName</td>
+                                                                <td class="text-center">@line.Quantity</td>
+                                                                <td class="text-end">$@line.UnitPrice.ToString("N2")</td>
+                                                                <td class="text-end">$@line.LineTotal.ToString("N2")</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td colspan="3" class="text-end fw-bold">Total Amount:</td>
+                                                            <td class="text-end fw-bold">$@order.TotalAmount.ToString("N2")</td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No order lines found.</span>
+                                        }
                                     </td>
                                 </tr>
                             }

@@ -37,11 +37,6 @@
                             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-warning">
                                 ✏️ Edit Address
                             </a>
-                            <form asp-action="Delete" asp-route-id="@Model.Id" method="post" onsubmit="return confirm('Are you sure?');">
-                                <button type="submit" class="btn btn-danger">
-                                    🗑️ Delete Address
-                                </button>
-                            </form>
                         }
                         <a asp-action="Index" class="btn btn-outline-secondary ms-auto">
                             ← Back to Addresses

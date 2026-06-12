@@ -1,4 +1,4 @@
-﻿@model PaginatedResult<ProductsListVM>
+@model PaginatedResult<ProductsListVM>
 
 @{
     ViewData["Title"] = "Product List";
@@ -7,96 +7,183 @@
 <div class="container mt-4">
     <h2 class="mb-4 text-center">🛍 Products</h2>
 
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @successMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Error"] is string errorMessage)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @errorMessage
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form method="get" asp-action="Index" class="row g-2 mb-3">
+        <div class="col-md-3">
+            <select class="form-select" name="categoryName">
+                <option value="">All Categories</option>
+                @foreach (var categoryName in (IEnumerable<string>)ViewBag.CategoryOptions)
+                {
+                    <option value="@categoryName" selected="@(string.Equals((string?)ViewBag.SelectedCategoryName, categoryName, StringComparison.OrdinalIgnoreCase))">@categoryName</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="isActive">
+                <option value="" selected="@string.IsNullOrWhiteSpace((string?)ViewBag.SelectedIsActive)">All Status</option>
+                <option value="true" selected="@(ViewBag.SelectedIsActive == "true")">Active</option>
+                <option value="false" selected="@(ViewBag.SelectedIsActive == "false")">Inactive</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select class="form-select" name="stockStatus">
+                <option value="" selected="@string.IsNullOrWhiteSpace((string?)ViewBag.SelectedStockStatus)">All Stock</option>
+                <option value="instock" selected="@(ViewBag.SelectedStockStatus == "instock")">In Stock</option>
+                <option value="lowstock" selected="@(ViewBag.SelectedStockStatus == "lowstock")">Low Stock</option>
+                <option value="outofstock" selected="@(ViewBag.SelectedStockStatus == "outofstock")">Out of Stock</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" name="sortBy">
+                <option value="" selected="@string.IsNullOrWhiteSpace((string?)ViewBag.SortBy)">Newest</option>
+                <option value="price_asc" selected="@(ViewBag.SortBy == "price_asc")">Price: Low to High</option>
+                <option value="price_desc" selected="@(ViewBag.SortBy == "price_desc")">Price: High to Low</option>
+                <option value="quantity_asc" selected="@(ViewBag.SortBy == "quantity_asc")">Quantity: Low to High</option>
+                <option value="quantity_desc" selected="@(ViewBag.SortBy == "quantity_desc")">Quantity: High to Low</option>
+            </select>
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-dark">Apply Filters</button>
+        </div>
+        <div class="col-md-auto">
+            <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </form>
+
+    <form class="row g-2 mb-3"
+          data-live-search-form="true"
+          data-search-mode="client"
+          data-filter-scope="#product-list"
+          data-filter-item-selector="[data-filter-item='true']"
+          data-filter-empty-state="#product-empty-state"
+          data-filter-pagination="#product-pagination">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Quick search in current page" data-live-search-input="true" />
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-outline-dark">Search</button>
+        </div>
+        <div class="col-md-auto">
+            <button type="button" class="btn btn-outline-secondary" data-live-search-clear="true">Clear</button>
+        </div>
+    </form>
+
     @if (User.IsInRole("Admin"))
     {
-        <div class="d-flex justify-content-end mb-3">
+        <div class="d-flex justify-content-end mb-3 gap-2">
+            <a asp-action="TopSold" class="btn btn-info text-white">
+                📈 Top 3 Sold
+            </a>
             <a asp-action="Add" class="btn btn-success">
                 ➕ Add Product
             </a>
         </div>
     }
-    <div class="row g-4 mt-4">
+    <div class="row g-4 mt-4" id="product-list">
 
         @if (Model.Items.Any())
         {
             foreach (var item in Model.Items)
             {
-                <div class="col-md-4 col-lg-3">
-                    <div class="card h-100 shadow-sm border-0 product-card">
-
-                        @if (item.ProductPicture != null)
+                <div class="col-md-4 col-lg-3" data-filter-item="true" data-search-text="@item.Name">
+                    <div class="premium-card-container">
+                        @if (item.HasActiveSale)
                         {
-                            <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductPicture)" />
+                            <div class="premium-card-badge badge-orange">🔥</div>
+                        }
+                        else if (item.StockQuantity <= 0)
+                        {
+                            <div class="premium-card-badge badge-pink">⏳</div>
+                        }
+                        else if (item.StockQuantity <= 10)
+                        {
+                            <div class="premium-card-badge badge-purple">⚠️</div>
                         }
                         else
                         {
-                            <img src="~/images/DefaultProduct.jpg" />
+                            <div class="premium-card-badge badge-green">✅</div>
                         }
 
-                        <div class="card-body d-flex flex-column">
+                        @if (item.ProductPicture != null)
+                        {
+                            <img src="data:image/png;base64,@Convert.ToBase64String(item.ProductPicture)" class="premium-card-image" alt="@item.Name" />
+                        }
+                        else
+                        {
+                            <img src="~/Images/DefaultProduct.jpg" class="premium-card-image" alt="@item.Name" />
+                        }
 
-                            
-                            <h6 class="card-title fw-bold text-truncate">
-                                @item.Name
-                            </h6>
+                        <div class="premium-card-overlay">
+                            <h3 class="premium-card-title text-truncate">@item.Name</h3>
+                            <div class="premium-card-subtitle">Ref: @PublicIdFormatter.ToPublicGuid(item.Id)</div>
 
-                            
-                            <span class="badge bg-light text-dark mb-2">
-                                @item.CategoryName
-                            </span>
-
-                            
                             <div class="mb-2">
-                                <span class="text-success fw-bold fs-5">
-                                    $@item.Price.ToString("N2")
-                                </span>
-                            </div>
-
-                            
-                            <div class="mb-3">
-                                @if (item.StockQuantity > 10)
+                                @if (item.HasActiveSale)
                                 {
-                                    <span class="text-success small">
-                                        In Stock
-                                    </span>
-                                }
-                                else if (item.StockQuantity > 0)
-                                {
-                                    <span class="text-warning small">
-                                        Low Stock
-                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="text-white-50 text-decoration-line-through small">$@item.Price.ToString("N2")</span>
+                                        <span class="text-warning fw-bold fs-5">$@item.EffectivePrice.ToString("N2")</span>
+                                    </div>
                                 }
                                 else
                                 {
-                                    <span class="text-danger small">
-                                        Out of Stock
+                                    <span class="text-warning fw-bold fs-5">
+                                        $@item.Price.ToString("N2")
                                     </span>
                                 }
                             </div>
 
-                            
-                            <a asp-action="Details"
-                               asp-route-id="@item.Id"
-                               class="btn btn-dark mt-auto">
-                                View Details
-                            </a>
+                            <div class="mb-3" style="font-size: 0.85rem;">
+                                @if (item.StockQuantity > 10)
+                                {
+                                    <span style="color: #A7F3D0; font-weight: 600;">● In Stock</span>
+                                }
+                                else if (item.StockQuantity > 0)
+                                {
+                                    <span style="color: #FDE68A; font-weight: 600;">● Low Stock (@item.StockQuantity)</span>
+                                }
+                                else
+                                {
+                                    <span style="color: #FCA5A5; font-weight: 600;">● Out of Stock</span>
+                                }
+                            </div>
+
+                            <div class="premium-card-btn-container w-100 flex-wrap">
+                                <a asp-action="Details" asp-route-id="@item.Id" class="premium-card-btn flex-fill text-center">Details</a>
+                                
+                                @if (User.IsInRole("Client"))
+                                {
+                                    <button type="button" 
+                                            class="premium-card-btn premium-card-btn-primary add-to-cart-btn flex-fill" 
+                                            data-product-id="@item.Id"
+                                            @(item.StockQuantity <= 0 ? "disabled" : "")>Add</button>
+                                }
+                            </div>
+
                             @if (User.IsInRole("Admin"))
                             {
-                                <div class="mt-2 d-flex gap-2">
-                                    <a asp-action="Edit"
-                                       asp-route-id="@item.Id"
-                                       class="btn btn-sm btn-warning w-50">
-                                        ✏ Edit
-                                    </a>
-
-                                    <form asp-action="Delete"
-                                          asp-route-id="@item.Id"
-                                          method="post"
-                                          class="w-50"
-                                          onsubmit="return confirm('Are you sure?');">
-                                        <button type="submit" class="btn btn-sm btn-danger w-100">
-                                            🗑 Delete
-                                        </button>
+                                <div class="d-flex gap-1 w-100 mt-2">
+                                    <a asp-action="Edit" asp-route-id="@item.Id" class="premium-card-btn flex-fill text-center py-1 px-2" style="font-size: 0.75rem;">Edit</a>
+                                    <a asp-action="Sale" asp-route-id="@item.Id" class="premium-card-btn flex-fill text-center py-1 px-2" style="font-size: 0.75rem;">Sale</a>
+                                </div>
+                                <div class="w-100 mt-1">
+                                    <form asp-action="Delete" asp-route-id="@item.Id" method="post" class="w-100" onsubmit="return confirm('Are you sure?');">
+                                        <button type="submit" class="premium-card-btn premium-card-btn-primary w-100 py-1" style="font-size: 0.75rem; background-color: var(--color-danger); border-color: var(--color-danger);">Delete</button>
                                     </form>
                                 </div>
                             }
@@ -105,24 +192,25 @@
                 </div>
             }
         }
-        else
-        {
-            <div class="col-12 text-center">
-                <p>No products available.</p>
-            </div>
-        }
+        <div id="product-empty-state" class="col-12 text-center @(Model.Items.Any() ? "d-none" : string.Empty)">
+            <p>@(Model.Items.Any() ? "No products match your search." : "No products available.")</p>
+        </div>
 
     </div>
 
     
-    <nav class="mt-4">
+    <nav class="mt-4" id="product-pagination">
         <ul class="pagination justify-content-center">
             @for (int i = 1; i <= Model.TotalPages; i++)
             {
                 <li class="page-item @(i == Model.PageNumber ? "active" : "")">
                     <a class="page-link"
                        asp-action="Index"
-                       asp-route-page="@i">
+                       asp-route-page="@i"
+                       asp-route-categoryName="@ViewBag.SelectedCategoryName"
+                       asp-route-isActive="@ViewBag.SelectedIsActive"
+                       asp-route-stockStatus="@ViewBag.SelectedStockStatus"
+                       asp-route-sortBy="@ViewBag.SortBy">
                         @i
                     </a>
                 </li>
@@ -130,3 +218,28 @@
         </ul>
     </nav>
 </div>
+
+@section Scripts {
+    <script>
+        document.querySelectorAll('.add-to-cart-btn').forEach((button) => {
+            button.addEventListener('click', async () => {
+                const productId = button.getAttribute('data-product-id');
+                const response = await fetch('/Cart/AddToCart', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ productId, quantity: '1' })
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    button.textContent = 'Added';
+                    button.classList.remove('btn-success');
+                    button.classList.add('btn-outline-success');
+                }
+                else {
+                    alert(data.message || 'Could not add product to cart.');
+                }
+            });
+        });
+    </script>
+}

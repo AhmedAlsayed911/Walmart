@@ -2,6 +2,7 @@
 
 @{
     ViewData["Title"] = "Edit Address";
+    var isAdminEdit = ViewBag.IsAdminEdit as bool? ?? false;
 }
 
 <div class="container mt-5">
@@ -18,13 +19,20 @@
                         <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
                         
-                        <div class="mb-3">
-                            <label asp-for="UserId" class="form-label">User</label>
-                            <select asp-for="UserId" asp-items="Model.Users" class="form-select">
-                                <option value="">-- Select User --</option>
-                            </select>
-                            <span asp-validation-for="UserId" class="text-danger"></span>
-                        </div>
+                        @if (isAdminEdit)
+                        {
+                            <div class="mb-3">
+                                <label asp-for="UserId" class="form-label">User</label>
+                                <select asp-for="UserId" asp-items="Model.Users" class="form-select">
+                                    <option value="">-- Select User --</option>
+                                </select>
+                                <span asp-validation-for="UserId" class="text-danger"></span>
+                            </div>
+                        }
+                        else
+                        {
+                            <input type="hidden" asp-for="UserId" />
+                        }
 
                         
                         <div class="mb-3">
@@ -66,7 +74,7 @@
 
                         
                         <div class="d-flex justify-content-between mt-4">
-                            <a asp-action="Index" class="btn btn-outline-secondary">
+                            <a asp-action="@(isAdminEdit ? "Index" : "MyAddresses")" class="btn btn-outline-secondary">
                                 Cancel
                             </a>
                             <button type="submit" class="btn btn-dark">

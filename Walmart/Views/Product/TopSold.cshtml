@@ -1,0 +1,63 @@
+@model List<TopSoldProductVM>
+
+@{
+    ViewData["Title"] = "Top 3 Sold Products";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="mb-0">Top 3 Sold Products</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">Back to Products</a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-0">
+            @if (Model.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th class="text-end">Units Sold</th>
+                                <th class="text-end">Revenue</th>
+                                <th class="text-end">Current Price</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td>@item.Name</td>
+                                    <td>@item.Sku</td>
+                                    <td class="text-end">@item.UnitsSold</td>
+                                    <td class="text-end">$@item.TotalRevenue.ToString("N2")</td>
+                                    <td class="text-end">
+                                        @if (item.HasActiveSale)
+                                        {
+                                            <span class="text-muted text-decoration-line-through small">$@item.CurrentPrice.ToString("N2")</span>
+                                            <span class="text-danger fw-bold ms-1">$@item.EffectivePrice.ToString("N2")</span>
+                                        }
+                                        else
+                                        {
+                                            <span>$@item.CurrentPrice.ToString("N2")</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <a asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-sm btn-dark">Details</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">No sales data available yet.</div>
+            }
+        </div>
+    </div>
+</div>

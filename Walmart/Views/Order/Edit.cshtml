@@ -1,0 +1,74 @@
+@model EditOrderVM
+
+@{
+    ViewData["Title"] = "Edit Order";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Edit Order</h2>
+
+    <div class="alert alert-warning">
+        Orders are editable only during the first 10 minutes after creation.
+    </div>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="OrderNumber" class="form-label"></label>
+                <input asp-for="OrderNumber" class="form-control" />
+                <span asp-validation-for="OrderNumber" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="UserId" class="form-label">Customer</label>
+                <select asp-for="UserId" asp-items="Model.Users" class="form-select"></select>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="ShippingAddressId" class="form-label"></label>
+                <select asp-for="ShippingAddressId" asp-items="Model.Addresses" class="form-select">
+                    <option value="">-- Select saved address --</option>
+                </select>
+                <span asp-validation-for="ShippingAddressId" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="TotalAmount" class="form-label"></label>
+                <input asp-for="TotalAmount" class="form-control" readonly />
+                <small class="text-muted">Total amount is recalculated from selected products.</small>
+                <span asp-validation-for="TotalAmount" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Status" class="form-label"></label>
+                <select asp-for="Status" class="form-select">
+                    <option value="0">Pending</option>
+                    <option value="1">Processing</option>
+                    <option value="2">Shipped</option>
+                    <option value="3">Delivered</option>
+                    <option value="4">Cancelled</option>
+                </select>
+            </div>
+
+            <div class="col-12">
+                <label asp-for="ProductIds" class="form-label">Ordered Products</label>
+                <select asp-for="ProductIds" asp-items="Model.Products" class="form-select" multiple size="8"></select>
+                <small class="text-muted">Hold Ctrl (or Cmd on Mac) to select multiple products.</small>
+                <span asp-validation-for="ProductIds" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

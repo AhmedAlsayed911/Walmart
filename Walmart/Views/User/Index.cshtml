@@ -5,6 +5,23 @@
 
 <h1>Users</h1>
 
+<form class="row g-2 mb-3"
+      data-live-search-form="true"
+      data-search-mode="client"
+      data-filter-scope="#users-table-body"
+      data-filter-item-selector="tr[data-filter-item='true']"
+      data-filter-empty-state="#users-empty-state">
+    <div class="col-md-6">
+        <input type="text" class="form-control" placeholder="Search by name, email, or username" data-live-search-input="true" />
+    </div>
+    <div class="col-md-auto">
+        <button type="submit" class="btn btn-dark">Filter</button>
+    </div>
+    <div class="col-md-auto">
+        <button type="button" class="btn btn-outline-secondary" data-live-search-clear="true">Clear</button>
+    </div>
+</form>
+
 <table class="table table-striped mt-4">
     <thead>
         <tr class="bg-primary text-white">
@@ -12,23 +29,29 @@
             <th>Last Name</th>
             <th>Username</th>
             <th>Email</th>
+            <th>Phone</th>
             <th>Roles</th>
             <th>Actions</th>
         </tr>
     </thead>
-    <tbody>
+    <tbody id="users-table-body">
         @foreach (var user in Model)
         {
-            <tr>
+            <tr data-filter-item="true" data-search-text="@($"{user.FirstName} {user.LastName} {user.Email} {user.Username}")">
                 <td>@user.FirstName</td>
                 <td>@user.LastName</td>
                 <td>@user.Username</td>
                 <td>@user.Email</td>
+                <td>@(string.IsNullOrWhiteSpace(user.PhoneNumber) ? "-" : user.PhoneNumber)</td>
                 <td>@string.Join(" , ", user.Roles.ToList())</td>
                 <td>
+                    <a class="btn btn-warning" asp-controller="User" asp-action="Edit" asp-route-userId="@user.Id">Edit Details</a>
                     <a class="btn btn-primary" asp-controller="User" asp-action="ManageRoles" asp-route-userId="@user.Id">Manage Roles</a>
                 </td>
             </tr>
         }
+        <tr id="users-empty-state" class="@(Model.Any() ? "d-none" : string.Empty)">
+            <td colspan="7" class="text-center text-muted">@(Model.Any() ? "No users match your search." : "No users found.")</td>
+        </tr>
     </tbody>
 </table>

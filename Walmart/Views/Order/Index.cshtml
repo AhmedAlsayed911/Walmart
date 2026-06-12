@@ -7,13 +7,63 @@
 <div class="container mt-4">
     <h2 class="mb-4 text-center">📦 Orders Management</h2>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="alert alert-warning">
+        <strong>Deletion policy:</strong> Only pending orders within the edit window can be deleted. Delivered or non-editable orders cannot be deleted.
+    </div>
+
+    <form method="get" asp-action="Index" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input type="number" name="orderId" value="@ViewBag.OrderId" class="form-control" placeholder="Search by Order ID" min="1" />
+        </div>
+        <div class="col-md-4">
+            <select name="sortBy" class="form-select">
+                <option value="">Newest first</option>
+                <option value="date_asc" selected="@(ViewBag.SortBy == "date_asc")">Oldest first</option>
+                <option value="elapsed_desc" selected="@(ViewBag.SortBy == "elapsed_desc")">Longest time since creation</option>
+                <option value="elapsed_asc" selected="@(ViewBag.SortBy == "elapsed_asc")">Shortest time since creation</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="status" class="form-select">
+                <option value="" selected="@(ViewBag.Status == null)">All Statuses</option>
+                <option value="0" selected="@(ViewBag.Status?.ToString() == "0")">Pending</option>
+                <option value="1" selected="@(ViewBag.Status?.ToString() == "1")">Processing</option>
+                <option value="2" selected="@(ViewBag.Status?.ToString() == "2")">Shipped</option>
+                <option value="3" selected="@(ViewBag.Status?.ToString() == "3")">Delivered</option>
+                <option value="4" selected="@(ViewBag.Status?.ToString() == "4")">Cancelled</option>
+            </select>
+        </div>
+        <div class="col-md-auto">
+            <button type="submit" class="btn btn-dark">Apply</button>
+        </div>
+        <div class="col-md-auto">
+            <a asp-action="Index" class="btn btn-outline-secondary">Clear</a>
+        </div>
+    </form>
+
     @if (User.IsInRole("Admin"))
     {
-        <div class="d-flex justify-content-end mb-3">
+        @* <div class="d-flex justify-content-end mb-3">
             <a asp-action="Add" class="btn btn-success">
                 ➕ Create New Order
             </a>
-        </div>
+        </div> *@
     }
 
     <div class="card shadow-sm border-0">
@@ -29,6 +79,7 @@
                                 <th>Date</th>
                                 <th>Status</th>
                                 <th>Total</th>
+                                <th>Edit Window</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
@@ -52,7 +103,7 @@
                                                 <span class="badge bg-info">Processing</span>
                                                 break;
                                             case 2:
-                                                <span class="badge bg-primary">Shipped</span>
+                                                <span class="badge bg-primary">On Way</span>
                                                 break;
                                             case 3:
                                                 <span class="badge bg-success">Delivered</span>
@@ -64,6 +115,19 @@
                                     </td>
                                     <td class="text-success fw-bold">$@order.TotalAmount.ToString("N2")</td>
                                     <td>
+                                        <div class="small text-muted">
+                                            @Math.Floor((DateTime.UtcNow - order.OrderDate).TotalMinutes) min ago
+                                        </div>
+                                        @if (order.CanEdit)
+                                        {
+                                            <span class="badge bg-success">Editable</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-secondary">Locked</span>
+                                        }
+                                    </td>
+                                    <td>
                                         <div class="btn-group" role="group">
                                             <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-info">
                                                 👁️ View
@@ -73,13 +137,67 @@
                                                 <a asp-action="Edit" asp-route-id="@order.Id" class="btn btn-sm btn-warning">
                                                     ✏️
                                                 </a>
-                                                <form asp-action="Delete" asp-route-id="@order.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure?');">
-                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                            }
+
+                                            @if (User.IsInRole("Admin") && order.CanEdit && order.Status == 0)
+                                            {
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger"
+                                                        data-bs-toggle="modal"
+                                                        data-bs-target="#deleteOrderModal"
+                                                        data-order-id="@order.Id"
+                                                        data-order-number="@order.OrderNumber">
                                                         🗑️
-                                                    </button>
-                                                </form>
+                                                </button>
+                                            }
+                                            else if (User.IsInRole("Admin"))
+                                            {
+                                                <button type="button" class="btn btn-sm btn-danger" disabled title="Delete is allowed only for pending orders in the edit window.">
+                                                    🗑️
+                                                </button>
                                             }
                                         </div>
+                                    </td>
+                                </tr>
+                                <tr class="table-light">
+                                    <td colspan="7">
+                                        <div class="small text-muted mb-2">Order lines:</div>
+                                        @if (order.Items.Any())
+                                        {
+                                            <div class="table-responsive">
+                                                <table class="table table-sm mb-0">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Product</th>
+                                                            <th class="text-center">Qty</th>
+                                                            <th class="text-end">Unit Price</th>
+                                                            <th class="text-end">Line Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        @foreach (var line in order.Items)
+                                                        {
+                                                            <tr>
+                                                                <td>@line.ProductName</td>
+                                                                <td class="text-center">@line.Quantity</td>
+                                                                <td class="text-end">$@line.UnitPrice.ToString("N2")</td>
+                                                                <td class="text-end">$@line.LineTotal.ToString("N2")</td>
+                                                            </tr>
+                                                        }
+                                                    </tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <td colspan="3" class="text-end fw-bold">Total Amount:</td>
+                                                            <td class="text-end fw-bold">$@order.TotalAmount.ToString("N2")</td>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No order lines found.</span>
+                                        }
                                     </td>
                                 </tr>
                             }
@@ -104,10 +222,90 @@
                 @for (int i = 1; i <= Model.TotalPages; i++)
                 {
                     <li class="page-item @(i == Model.PageNumber ? "active" : "")">
-                        <a class="page-link" asp-action="Index" asp-route-page="@i">@i</a>
+                        <a class="page-link"
+                           asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-orderId="@ViewBag.OrderId"
+                           asp-route-status="@ViewBag.Status"
+                           asp-route-sortBy="@ViewBag.SortBy">@i</a>
                     </li>
                 }
             </ul>
         </nav>
     }
 </div>
+
+<div class="modal fade" id="deleteOrderModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="Delete" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Order</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="deleteOrderId" name="id" />
+                    <p class="mb-2">You are deleting order <strong id="deleteOrderNumber"></strong>.</p>
+                    <div class="alert alert-danger">
+                        Confirm that customer deposit refund is returned before deletion.
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" value="true" id="refundConfirmed" name="refundConfirmed" required hidden>
+                        <label class="form-check-label" for="refundConfirmed">
+                            <button type="button" id="refundButton" class="btn btn-outline-success btn-sm">Return Client Money</button>
+                        </label>
+                    </div>
+                    <div class="mb-2">
+                        <label for="deletionReason" class="form-label">Reason sent to client</label>
+                        <textarea class="form-control" id="deletionReason" name="deletionReason" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const deleteOrderModal = document.getElementById('deleteOrderModal');
+        if (deleteOrderModal) {
+            deleteOrderModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const orderId = button.getAttribute('data-order-id');
+            const orderNumber = button.getAttribute('data-order-number');
+
+            document.getElementById('deleteOrderId').value = orderId;
+            document.getElementById('deleteOrderNumber').textContent = orderNumber;
+            document.getElementById('refundConfirmed').checked = false;
+            const refundButton = document.getElementById('refundButton');
+            if (refundButton) {
+                refundButton.classList.remove('btn-success');
+                refundButton.classList.add('btn-outline-success');
+                refundButton.textContent = 'Return Client Money';
+            }
+            document.getElementById('deletionReason').value = '';
+            });
+
+            const refundButton = document.getElementById('refundButton');
+            const refundCheckbox = document.getElementById('refundConfirmed');
+            if (refundButton && refundCheckbox) {
+                refundButton.addEventListener('click', function () {
+                    refundCheckbox.checked = !refundCheckbox.checked;
+                    if (refundCheckbox.checked) {
+                        refundButton.classList.remove('btn-outline-success');
+                        refundButton.classList.add('btn-success');
+                        refundButton.textContent = 'Money Returned';
+                    } else {
+                        refundButton.classList.remove('btn-success');
+                        refundButton.classList.add('btn-outline-success');
+                        refundButton.textContent = 'Return Client Money';
+                    }
+                });
+            }
+        }
+    </script>
+}

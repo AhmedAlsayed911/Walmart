@@ -1,0 +1,97 @@
+@model EditUserVM
+@{
+    ViewData["Title"] = "Edit User";
+    var addresses = ViewBag.UserAddresses as List<Walmart.Application.ViewModels.Address.AddressListVM> ?? new List<Walmart.Application.ViewModels.Address.AddressListVM>();
+}
+
+<div class="container mt-4">
+    <h2 class="mb-4">Edit User Details</h2>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label asp-for="PhoneNumber" class="form-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex gap-2">
+            <button type="submit" class="btn btn-success">Save Changes</button>
+            <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+    </form>
+
+    <hr class="my-4" />
+
+    <h4 class="mb-3">Saved Addresses</h4>
+    @if (addresses.Count > 0)
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Street</th>
+                        <th>City</th>
+                        <th>Country</th>
+                        <th>ZIP</th>
+                        <th>Default</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var address in addresses)
+                    {
+                        <tr>
+                            <td>@address.Street</td>
+                            <td>@address.City</td>
+                            <td>@address.Country</td>
+                            <td>@address.ZIP</td>
+                            <td>@(address.IsDefault ? "Yes" : "No")</td>
+                            <td>
+                                <a asp-controller="Address" asp-action="Edit" asp-route-id="@address.Id" class="btn btn-sm btn-warning">Edit Address</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+        <div class="text-muted">Addresses are editable but cannot be deleted.</div>
+    }
+    else
+    {
+        <div class="alert alert-info">This user has no saved addresses yet.</div>
+    }
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

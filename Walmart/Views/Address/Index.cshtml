@@ -7,6 +7,14 @@
 <div class="container mt-4">
     <h2 class="mb-4 text-center">📍 Addresses Management</h2>
 
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
     @if (User.IsInRole("Admin"))
     {
         <div class="d-flex justify-content-end mb-3">
@@ -44,11 +52,6 @@
                                     <a asp-action="Edit" asp-route-id="@address.Id" class="btn btn-sm btn-warning">
                                         ✏️
                                     </a>
-                                    <form asp-action="Delete" asp-route-id="@address.Id" method="post" class="d-inline" onsubmit="return confirm('Are you sure?');">
-                                        <button type="submit" class="btn btn-sm btn-danger">
-                                            🗑️
-                                        </button>
-                                    </form>
                                 }
                             </div>
                         </div>

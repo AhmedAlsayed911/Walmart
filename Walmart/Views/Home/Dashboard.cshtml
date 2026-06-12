@@ -1,0 +1,186 @@
+@model AdminDashboardVM
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Admin Dashboard</h2>
+        <a asp-controller="Order" asp-action="Index" class="btn btn-outline-dark">Manage Orders</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="Product" asp-action="Index" class="text-decoration-none text-reset d-block h-100">
+            <div class="card shadow-sm border-0 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total Products</p>
+                    <h3 class="mb-0">@Model.TotalProducts</h3>
+                    <small class="text-muted">View product catalog</small>
+                </div>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="Category" asp-action="Index" class="text-decoration-none text-reset d-block h-100">
+            <div class="card shadow-sm border-0 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total Categories</p>
+                    <h3 class="mb-0">@Model.TotalCategories</h3>
+                    <small class="text-muted">View categories</small>
+                </div>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="Order" asp-action="Index" class="text-decoration-none text-reset d-block h-100">
+            <div class="card shadow-sm border-0 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total Orders</p>
+                    <h3 class="mb-0">@Model.TotalOrders</h3>
+                    <small class="text-muted">View all orders</small>
+                </div>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="User" asp-action="Index" class="text-decoration-none text-reset d-block h-100">
+            <div class="card shadow-sm border-0 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total Users</p>
+                    <h3 class="mb-0">@Model.TotalUsers</h3>
+                    <small class="text-muted">View users</small>
+                </div>
+            </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="Order" asp-action="Index" asp-route-status="0" class="text-decoration-none text-reset d-block h-100">
+            <div class="card border-warning border-2 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Pending Orders</p>
+                    <h4 class="mb-0">@Model.PendingOrders</h4>
+                </div>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="Order" asp-action="Index" asp-route-status="3" class="text-decoration-none text-reset d-block h-100">
+            <div class="card border-success border-2 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Delivered Orders</p>
+                    <h4 class="mb-0">@Model.DeliveredOrders</h4>
+                </div>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="Order" asp-action="Index" asp-route-status="4" class="text-decoration-none text-reset d-block h-100">
+            <div class="card border-danger border-2 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Cancelled Orders</p>
+                    <h4 class="mb-0">@Model.CancelledOrders</h4>
+                </div>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <a asp-controller="Product" asp-action="Index" asp-route-stockStatus="lowstock" class="text-decoration-none text-reset d-block h-100">
+            <div class="card border-info border-2 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Low Stock Products</p>
+                    <h4 class="mb-0">@Model.LowStockProducts</h4>
+                </div>
+            </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <a asp-controller="Product" asp-action="Index" asp-route-stockStatus="instock" class="text-decoration-none text-reset d-block h-100">
+            <div class="card border-success border-2 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Products In Stock</p>
+                    <h4 class="mb-0">@Model.InStockProducts</h4>
+                </div>
+            </div>
+            </a>
+        </div>
+        <div class="col-md-6">
+            <a asp-controller="Product" asp-action="Index" asp-route-stockStatus="outofstock" class="text-decoration-none text-reset d-block h-100">
+            <div class="card border-danger border-2 h-100 position-relative">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Products Out Of Stock</p>
+                    <h4 class="mb-0">@Model.OutOfStockProducts</h4>
+                </div>
+            </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Total Revenue (non-cancelled)</p>
+                    <h3 class="text-success mb-0">$@Model.TotalRevenue.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <p class="text-muted mb-1">Revenue This Month</p>
+                    <h3 class="text-primary mb-0">$@Model.RevenueThisMonth.ToString("N2")</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+        <div class="card-header bg-white">
+            <h5 class="mb-0">Top Selling Products</h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.TopSellingProducts.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>SKU</th>
+                                <th class="text-end">Units Sold</th>
+                                <th class="text-end">Revenue</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.TopSellingProducts)
+                            {
+                                <tr>
+                                    <td>@item.Name</td>
+                                    <td>@item.Sku</td>
+                                    <td class="text-end">@item.UnitsSold</td>
+                                    <td class="text-end">$@item.TotalRevenue.ToString("N2")</td>
+                                    <td class="text-end">
+                                        <a asp-controller="Product" asp-action="Details" asp-route-id="@item.ProductId" class="btn btn-sm btn-outline-dark">View</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="p-4 text-center text-muted">No sales data available yet.</div>
+            }
+        </div>
+    </div>
+</div>

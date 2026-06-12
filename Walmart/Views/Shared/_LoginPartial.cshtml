@@ -1,34 +1,41 @@
-﻿@using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.Identity
 @using Walmart.Domain.Entities
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
 
-<ul class="navbar-nav">
+@{
+    var appUser = SignInManager.IsSignedIn(User) ? await UserManager.GetUserAsync(User) : null;
+}
+
+<ul class="navbar-nav align-items-center gap-1">
 @if (SignInManager.IsSignedIn(User))
 {
-    if(UserManager.GetUserAsync(User).Result.ProfilePicture is not null)
+    <li class="nav-item d-flex align-items-center me-1">
+        @if (appUser?.ProfilePicture is not null)
         {
-            <li class="nav-item">
-                <img class="rounded-circle avatar" alt="profile" src="data:image;base64,@(Convert.ToBase64String(UserManager.GetUserAsync(User).Result.ProfilePicture))" class="profile-picture" />
-            </li>
-
+            <img class="rounded-circle avatar" alt="profile" src="data:image/png;base64,@(Convert.ToBase64String(appUser.ProfilePicture))" style="width: 36px; height: 36px; object-fit: cover; border: 2px solid var(--primary-blue-light);" />
         }
-        <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
+        else
+        {
+            <img class="rounded-circle avatar" alt="profile" src="~/Images/profilepic.jpg" style="width: 36px; height: 36px; object-fit: cover; border: 2px solid var(--primary-blue-light);" />
+        }
     </li>
     <li class="nav-item">
-        <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+        <a class="nav-link-custom fw-semibold" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @(appUser != null ? appUser.FirstName + " " + appUser.LastName : User.Identity?.Name)!</a>
+    </li>
+    <li class="nav-item">
+        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+            <button type="submit" class="btn-blue-link bg-transparent border-0 p-0 fs-6">Logout</button>
         </form>
     </li>
 }
 else
 {
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+        <a class="btn-blue-link" asp-area="Identity" asp-page="/Account/Login">Login</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+        <a class="btn-orange-pill ms-2" asp-area="Identity" asp-page="/Account/Register">Register</a>
     </li>
 }
 </ul>
